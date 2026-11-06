@@ -637,6 +637,11 @@
         </div>
     </div>
 
+    <!-- NOTIFICATION CONTAINER (Left Side: Below Info Card & Above Taskbar) -->
+    <div id="notification-container" class="fixed bottom-20 left-6 z-40 flex flex-col space-y-2 max-w-xs w-full pointer-events-none">
+        <!-- Toast notifications render dynamically here -->
+    </div>
+
     <!-- FLOATING MINI MUSIC VISUALIZER WIDGET (Appears when window is closed while playing) -->
     <div id="mini-music-visualizer" onclick="openMusic()" class="hidden fixed bottom-20 right-6 z-40 glass-panel px-4 py-2.5 rounded-2xl flex items-center space-x-3 text-white shadow-2xl cursor-pointer hover:bg-white/30 transition-all duration-300 border border-cyan-400/40 animate-bounce-slow">
         <!-- Live Wave Visualizer Equalizer Bars -->
@@ -683,6 +688,86 @@
             </button>
         </div>
     </footer>
+
+    <!-- Firebase Cloud Storage SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Configuration
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'mouszaik-app';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "demo-key",
+            authDomain: "demo.firebaseapp.com",
+            projectId: "demo-project",
+            storageBucket: "demo.appspot.com"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+
+        // Auto Authentication & Real-time Cloud Sync
+        async function initCloudSync() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    const userCred = await signInWithCustomToken(auth, __initial_auth_token);
+                    currentUser = userCred.user;
+                } else {
+                    const userCred = await signInAnonymously(auth);
+                    currentUser = userCred.user;
+                }
+
+                if (currentUser) {
+                    // Path penyimpanan cloud publik (antar perangkat)
+                    const driveCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'drive_files');
+
+                    // Real-time listener: Perubahan file dari HP / Laptop lain akan langsung update di layar ini
+                    onSnapshot(driveCollectionRef, (snapshot) => {
+                        const cloudFiles = [];
+                        snapshot.forEach((docSnap) => {
+                            cloudFiles.push({ id: docSnap.id, ...docSnap.data() });
+                        });
+                        
+                        window.driveFiles = cloudFiles;
+                        if (typeof window.renderDriveFiles === 'function') {
+                            window.renderDriveFiles();
+                        }
+                    }, (error) => {
+                        console.warn("Cloud sync error, falling back to local storage:", error);
+                    });
+                }
+            } catch (err) {
+                console.warn("Firebase Auth Error, fallback offline:", err);
+            }
+        }
+
+        // Global functions untuk Cloud Database CRUD
+        window.saveDriveFileToCloud = async function(fileObj) {
+            if (!currentUser) return;
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'drive_files', fileObj.id);
+                await setDoc(docRef, fileObj);
+            } catch (err) {
+                console.error("Gagal menyimpan ke cloud:", err);
+            }
+        };
+
+        window.deleteDriveFileFromCloud = async function(fileId) {
+            if (!currentUser) return;
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'drive_files', fileId);
+                await deleteDoc(docRef);
+            } catch (err) {
+                console.error("Gagal menghapus dari cloud:", err);
+            }
+        };
+
+        initCloudSync();
+    </script>
 
     <!-- JavaScript Logic -->
     <script>
@@ -994,29 +1079,215 @@
             { id: 'file_3', name: 'Proyek_Final.pdf', type: 'pdf', size: '5.2 MB', sizeMB: 5.2, content: 'Dokumen PDF Proyek Final disiapkan untuk presentasi.' }
         ];
 
-        let driveFiles = [];
+        window.driveFiles = [];
         let selectedFileForContext = null;
 
         function loadDriveFiles() {
             try {
                 const saved = localStorage.getItem('mouszaik_drive_files');
                 if (saved) {
-                    driveFiles = JSON.parse(saved);
+                    window.driveFiles = JSON.parse(saved);
                 } else {
-                    driveFiles = [...DEFAULT_DRIVE_FILES];
+                    window.driveFiles = [...DEFAULT_DRIVE_FILES];
                     saveDriveFiles();
                 }
             } catch (e) {
-                driveFiles = [...DEFAULT_DRIVE_FILES];
+                window.driveFiles = [...DEFAULT_DRIVE_FILES];
             }
             renderDriveFiles();
         }
 
         function saveDriveFiles() {
             try {
-                localStorage.setItem('mouszaik_drive_files', JSON.stringify(driveFiles));
+                localStorage.setItem('mouszaik_drive_files', JSON.stringify(window.driveFiles));
             } catch (e) {
                 console.warn('Storage quota limit reached for localStorage', e);
+            }
+        }
+
+        function renderDriveFiles() {
+            const grid = document.getElementById('file-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            let totalMB = 0;
+
+            (window.driveFiles || []).forEach(file => {
+                totalMB += (file.sizeMB || 1.0);
+
+                let iconClass = 'fa-file text-cyan-400';
+                if (file.type === 'image' || file.type?.startsWith('image/')) iconClass = 'fa-file-image text-emerald-400';
+                else if (file.type === 'video' || file.type?.startsWith('video/')) iconClass = 'fa-file-video text-purple-400';
+                else if (file.type === 'pdf' || file.type?.includes('pdf')) iconClass = 'fa-file-pdf text-rose-400';
+                else if (file.type === 'document' || file.type?.includes('word')) iconClass = 'fa-file-word text-blue-400';
+                else if (file.type?.includes('zip') || file.type?.includes('rar')) iconClass = 'fa-file-zipper text-yellow-400';
+                else if (file.type?.includes('text') || file.name.endsWith('.js') || file.name.endsWith('.html')) iconClass = 'fa-file-code text-cyan-300';
+
+                const fileCard = document.createElement('div');
+                fileCard.className = 'bg-slate-900 border border-slate-800 hover:border-cyan-500/50 p-3 rounded-xl flex flex-col items-center text-center cursor-pointer hover:scale-102 transition group relative';
+                
+                fileCard.onclick = (e) => {
+                    // Prevent triggering preview if clicking dots
+                    if (e.target.closest('.three-dots-btn')) return;
+                    previewDriveFileItem(file);
+                };
+
+                fileCard.innerHTML = `
+                    <!-- 3-Dots Menu Button -->
+                    <button onclick="openContextMenu('${file.id}', event)" class="three-dots-btn absolute top-2 right-2 w-6 h-6 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">
+                        <i class="fa-solid fa-ellipsis-vertical text-xs"></i>
+                    </button>
+
+                    <i class="fa-solid ${iconClass} text-4xl my-2 group-hover:scale-110 transition"></i>
+                    <span class="text-xs font-medium text-slate-200 truncate w-full px-1" title="${file.name}">${file.name}</span>
+                    <span class="text-[10px] text-slate-400 mt-1">${file.size}</span>
+                `;
+
+                grid.appendChild(fileCard);
+            });
+
+            updateStorageMeter(totalMB);
+        }
+        window.renderDriveFiles = renderDriveFiles;
+
+        function updateStorageMeter(usedMB) {
+            const usedGB = (usedMB / 1024 + 1.2).toFixed(2);
+            const percentage = Math.min(100, Math.round((usedGB / 15) * 100));
+
+            document.getElementById('storage-text').innerText = `${usedGB} GB / 15 GB`;
+            document.getElementById('storage-bar').style.width = `${percentage}%`;
+        }
+
+        function triggerFileUpload() {
+            document.getElementById('drive-file-input').click();
+        }
+
+        function handleFileUpload(files) {
+            if (!files || files.length === 0) return;
+
+            Array.from(files).forEach(file => {
+                const fileSizeMB = parseFloat((file.size / (1024 * 1024)).toFixed(2)) || 0.1;
+                const formattedSize = file.size > 1024 * 1024 ? `${fileSizeMB} MB` : `${(file.size / 1024).toFixed(1)} KB`;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const newFile = {
+                        id: 'file_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                        name: file.name,
+                        type: file.type || 'document',
+                        size: formattedSize,
+                        sizeMB: fileSizeMB,
+                        content: e.target.result // Base64 or text preview string
+                    };
+                    window.driveFiles.unshift(newFile);
+                    saveDriveFiles();
+                    renderDriveFiles();
+
+                    // Simpan file ke penyimpanan cloud agar bisa diakses dari HP/Laptop lain
+                    if (window.saveDriveFileToCloud) {
+                        window.saveDriveFileToCloud(newFile);
+                    }
+                };
+
+                if (file.type.startsWith('image/')) {
+                    reader.readAsDataURL(file);
+                } else {
+                    reader.readAsText(file);
+                }
+            });
+        }
+
+        // Drag & Drop Handling
+        function handleDragOver(e) {
+            e.preventDefault();
+            document.getElementById('dropzone-overlay').classList.remove('hidden');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            if (e.clientX <= 0 || e.clientY <= 0 || e.clientX >= window.innerWidth || e.clientY >= window.innerHeight) {
+                document.getElementById('dropzone-overlay').classList.add('hidden');
+            }
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            document.getElementById('dropzone-overlay').classList.add('hidden');
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                handleFileUpload(e.dataTransfer.files);
+            }
+        }
+
+        // 3-Dots Context Menu & Action Handlers
+        function openContextMenu(fileId, event) {
+            event.stopPropagation();
+            selectedFileForContext = window.driveFiles.find(f => f.id === fileId);
+            if (!selectedFileForContext) return;
+
+            const ctxMenu = document.getElementById('context-menu');
+            ctxMenu.style.top = `${event.clientY + 5}px`;
+            ctxMenu.style.left = `${Math.min(window.innerWidth - 180, event.clientX - 100)}px`;
+            ctxMenu.classList.remove('hidden');
+        }
+
+        function handleRenameContextFile() {
+            document.getElementById('context-menu').classList.add('hidden');
+            if (!selectedFileForContext) return;
+
+            document.getElementById('rename-input').value = selectedFileForContext.name;
+            document.getElementById('rename-modal').classList.remove('hidden');
+        }
+
+        function closeRenameModal() {
+            document.getElementById('rename-modal').classList.add('hidden');
+        }
+
+        function saveRenamedFile() {
+            const newName = document.getElementById('rename-input').value.trim();
+            if (newName && selectedFileForContext) {
+                selectedFileForContext.name = newName;
+                saveDriveFiles();
+                renderDriveFiles();
+
+                if (window.saveDriveFileToCloud) {
+                    window.saveDriveFileToCloud(selectedFileForContext);
+                }
+            }
+            closeRenameModal();
+        }
+
+        function handleDownloadContextFile() {
+            document.getElementById('context-menu').classList.add('hidden');
+            if (!selectedFileForContext) return;
+
+            const file = selectedFileForContext;
+            const element = document.createElement('a');
+            
+            if (file.content && file.content.startsWith('data:')) {
+                element.setAttribute('href', file.content);
+            } else {
+                const blob = new Blob([file.content || 'Isi file ' + file.name], { type: 'text/plain' });
+                element.setAttribute('href', URL.createObjectURL(blob));
+            }
+            
+            element.setAttribute('download', file.name);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        }
+
+        function handleDeleteContextFile() {
+            document.getElementById('context-menu').classList.add('hidden');
+            if (!selectedFileForContext) return;
+
+            const fileIdToDelete = selectedFileForContext.id;
+            window.driveFiles = window.driveFiles.filter(f => f.id !== fileIdToDelete);
+            saveDriveFiles();
+            renderDriveFiles();
+
+            if (window.deleteDriveFileFromCloud) {
+                window.deleteDriveFileFromCloud(fileIdToDelete);
             }
         }
 
@@ -1095,6 +1366,7 @@
                     driveFiles.unshift(newFile);
                     saveDriveFiles();
                     renderDriveFiles();
+                    showUploadNotification(file.name);
                 };
 
                 if (file.type.startsWith('image/')) {
@@ -1103,6 +1375,48 @@
                     reader.readAsText(file);
                 }
             });
+        }
+
+        // Floating Toast Notification Logic
+        function showUploadNotification(fileName) {
+            const container = document.getElementById('notification-container');
+            const notif = document.createElement('div');
+            notif.className = 'glass-panel pointer-events-auto rounded-2xl p-3 flex items-center justify-between text-white shadow-xl border border-emerald-400/40 window-appear';
+            
+            notif.innerHTML = `
+                <div class="flex items-center space-x-3 overflow-hidden mr-2">
+                    <div class="w-8 h-8 rounded-full bg-emerald-500/80 text-white flex items-center justify-center flex-shrink-0 text-sm shadow">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="text-xs font-bold text-emerald-200 leading-tight">File Berhasil Diunggah!</p>
+                        <p class="text-[11px] text-cyan-100/90 truncate">${fileName}</p>
+                    </div>
+                </div>
+                <button onclick="dismissNotification(this.parentElement)" class="w-6 h-6 rounded-full hover:bg-white/20 text-slate-200 hover:text-white flex items-center justify-center text-xs transition flex-shrink-0">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            `;
+
+            container.appendChild(notif);
+
+            // Auto dismiss notification after 5 seconds if not closed manually
+            setTimeout(() => {
+                if (notif.parentElement) {
+                    dismissNotification(notif);
+                }
+            }, 5000);
+        }
+
+        function dismissNotification(notifEl) {
+            if (!notifEl) return;
+            notifEl.classList.remove('window-appear');
+            notifEl.classList.add('window-disappear');
+            setTimeout(() => {
+                if (notifEl.parentElement) {
+                    notifEl.remove();
+                }
+            }, 200);
         }
 
         // Drag & Drop Handling
