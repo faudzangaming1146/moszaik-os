@@ -637,6 +637,26 @@
         </div>
     </div>
 
+    <!-- FLOATING MINI MUSIC VISUALIZER WIDGET (Appears when window is closed while playing) -->
+    <div id="mini-music-visualizer" onclick="openMusic()" class="hidden fixed bottom-20 right-6 z-40 glass-panel px-4 py-2.5 rounded-2xl flex items-center space-x-3 text-white shadow-2xl cursor-pointer hover:bg-white/30 transition-all duration-300 border border-cyan-400/40 animate-bounce-slow">
+        <!-- Live Wave Visualizer Equalizer Bars -->
+        <div class="flex items-end space-x-1 h-5 w-6 flex-shrink-0">
+            <span class="w-1 bg-cyan-300 rounded-full animate-pulse h-3"></span>
+            <span class="w-1 bg-cyan-400 rounded-full animate-pulse h-5" style="animation-delay: 0.15s"></span>
+            <span class="w-1 bg-blue-400 rounded-full animate-pulse h-2" style="animation-delay: 0.3s"></span>
+            <span class="w-1 bg-emerald-400 rounded-full animate-pulse h-4" style="animation-delay: 0.45s"></span>
+        </div>
+        <!-- Track Title & Status -->
+        <div class="flex flex-col overflow-hidden max-w-[140px] text-left">
+            <span id="mini-music-title" class="text-xs font-bold truncate text-cyan-100 leading-tight">Memutar...</span>
+            <span class="text-[10px] text-cyan-200/70 truncate">Klik untuk membuka</span>
+        </div>
+        <!-- Play/Pause Toggle -->
+        <button onclick="event.stopPropagation(); togglePlayMusic()" class="w-7 h-7 rounded-full bg-cyan-500/80 hover:bg-cyan-400 text-white flex items-center justify-center text-xs shadow ml-1 transition">
+            <i id="mini-play-icon" class="fa-solid fa-pause"></i>
+        </button>
+    </div>
+
     <!-- Bottom Taskbar -->
     <footer class="relative z-20 flex justify-center items-center">
         <div class="glass-panel px-6 py-2 rounded-2xl flex items-center space-x-6">
@@ -1237,6 +1257,8 @@
         function openMusic() {
             musicWin.classList.remove('hidden');
             musicWin.classList.add('window-appear');
+            // Hide mini visualizer when main window is open
+            document.getElementById('mini-music-visualizer').classList.add('hidden');
             initWaveCanvas();
             if (!audioObj.src) {
                 fetchGitHubRootMusic();
@@ -1249,6 +1271,11 @@
             setTimeout(() => {
                 musicWin.classList.add('hidden');
                 musicWin.classList.remove('window-disappear');
+                
+                // Show mini visualizer widget if music is still playing in background
+                if (isPlaying) {
+                    document.getElementById('mini-music-visualizer').classList.remove('hidden');
+                }
             }, 200);
         }
 
@@ -1342,6 +1369,10 @@
             isPlaying = false;
             updatePlayPauseButton();
             document.getElementById('music-indicator').classList.add('hidden');
+            // Hide mini visualizer if paused when window is closed
+            if (musicWin.classList.contains('hidden')) {
+                document.getElementById('mini-music-visualizer').classList.add('hidden');
+            }
         }
 
         function nextMusic() {
@@ -1366,10 +1397,19 @@
 
         function updatePlayPauseButton() {
             const btn = document.getElementById('btn-play-pause');
+            const miniBtnIcon = document.getElementById('mini-play-icon');
+            const miniTitle = document.getElementById('mini-music-title');
+
+            if (playlist[currentTrackIdx]) {
+                miniTitle.innerText = playlist[currentTrackIdx].title;
+            }
+
             if (isPlaying) {
                 btn.innerHTML = `<i class="fa-solid fa-pause"></i>`;
+                if (miniBtnIcon) miniBtnIcon.className = "fa-solid fa-pause";
             } else {
                 btn.innerHTML = `<i class="fa-solid fa-play ml-0.5"></i>`;
+                if (miniBtnIcon) miniBtnIcon.className = "fa-solid fa-play ml-0.5";
             }
         }
 
