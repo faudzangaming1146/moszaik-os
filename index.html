@@ -508,9 +508,9 @@
             </div>
 
             <div class="flex items-center space-x-2">
-                <button onclick="fetchGitHubMusicPrompt()" class="text-xs text-cyan-300 hover:bg-slate-800 p-1.5 rounded-lg border border-cyan-500/30 transition flex items-center gap-1" title="Hubungkan Folder GitHub (music3)">
+                <button onclick="fetchGitHubRootMusic()" class="text-xs text-cyan-300 hover:bg-slate-800 p-1.5 rounded-lg border border-cyan-500/30 transition flex items-center gap-1" title="Muat Ulang Lagu dari GitHub (moszaik-os)">
                     <i class="fa-brands fa-github text-sm"></i>
-                    <span class="hidden sm:inline">GitHub</span>
+                    <span class="hidden sm:inline">Sync GitHub</span>
                 </button>
                 <button onclick="closeMusic()" class="w-5 h-5 rounded-full bg-rose-500 hover:bg-rose-600 flex items-center justify-center text-white text-[9px] font-bold transition">
                     <i class="fa-solid fa-xmark"></i>
@@ -582,8 +582,8 @@
                 <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
                     <i class="fa-solid fa-list-ul text-cyan-400"></i> Playlist (<span id="playlist-count">0</span>)
                 </span>
-                <span id="github-source-tag" class="text-[10px] text-cyan-400 bg-cyan-950 border border-cyan-800/60 px-2 py-0.5 rounded-full truncate max-w-[150px]">
-                    Folder: music3
+                <span id="github-source-tag" class="text-[10px] text-cyan-400 bg-cyan-950 border border-cyan-800/60 px-2 py-0.5 rounded-full truncate max-w-[170px]">
+                    faudzangaming1146/moszaik-os
                 </span>
             </div>
 
@@ -1202,24 +1202,15 @@
         // -------------------------------------------------------------
         // MUSIC PLAYER & FLUID WAVE VISUALIZER ENGINE
         // -------------------------------------------------------------
+        const GITHUB_REPO_OWNER = "faudzangaming1146";
+        const GITHUB_REPO_NAME = "moszaik-os";
+
         const DEFAULT_PLAYLIST = [
             {
                 title: "Cyberpunk Ambient Wave",
                 artist: "Mouszaik Sound Labs",
                 url: "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=ambient-piano-amp-strings-10711.mp3",
                 cover: "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=300&auto=format&fit=crop"
-            },
-            {
-                title: "Lo-Fi Beats for Coding",
-                artist: "Chill Hop Collective",
-                url: "https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=lofi-study-112191.mp3",
-                cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&auto=format&fit=crop"
-            },
-            {
-                title: "Synthwave Horizon",
-                artist: "Future Motion",
-                url: "https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=electronic-future-beats-117997.mp3",
-                cover: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop"
             }
         ];
 
@@ -1247,8 +1238,8 @@
             musicWin.classList.remove('hidden');
             musicWin.classList.add('window-appear');
             initWaveCanvas();
-            if (playlist.length > 0 && !audioObj.src) {
-                loadTrack(0, false);
+            if (!audioObj.src) {
+                fetchGitHubRootMusic();
             }
         }
 
@@ -1259,6 +1250,53 @@
                 musicWin.classList.add('hidden');
                 musicWin.classList.remove('window-disappear');
             }, 200);
+        }
+
+        // Fetch music automatically from root of GitHub repository faudzangaming1146/moszaik-os
+        async function fetchGitHubRootMusic() {
+            const tagEl = document.getElementById('github-source-tag');
+            tagEl.innerText = "Memuat dari GitHub...";
+
+            const apiUrl = `https://api.github.com/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/contents/`;
+
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error("Gagal mengambil data dari GitHub API");
+
+                const files = await response.json();
+                
+                // Filter file audio atau file yang tidak memiliki ekstensi .html/.md/.json/dsb
+                const audioFiles = files.filter(f => 
+                    f.type === "file" && 
+                    !f.name.endsWith(".html") && 
+                    !f.name.endsWith(".md") && 
+                    !f.name.endsWith(".json") &&
+                    !f.name.startsWith(".")
+                );
+
+                if (audioFiles.length > 0) {
+                    playlist = audioFiles.map(f => {
+                        // Bersihkan nama judul lagu dari ekstensi jika ada
+                        const cleanTitle = f.name.replace(/\.(mp3|wav|ogg|m4a|flac|aac)$/i, "");
+                        return {
+                            title: cleanTitle,
+                            artist: GITHUB_REPO_OWNER,
+                            url: f.download_url,
+                            cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&auto=format&fit=crop"
+                        };
+                    });
+
+                    tagEl.innerText = `${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}`;
+                    loadTrack(0, false);
+                } else {
+                    tagEl.innerText = "Lagu default";
+                    renderPlaylistItems();
+                }
+            } catch (err) {
+                console.warn("Gagal sinkronisasi lagu dari GitHub repo:", err);
+                tagEl.innerText = "Offline / Default";
+                renderPlaylistItems();
+            }
         }
 
         function loadTrack(index, autoPlay = true) {
@@ -1495,6 +1533,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             initChromeTabs();
             loadDriveFiles();
+            fetchGitHubRootMusic();
         });
     </script>
 </body>
