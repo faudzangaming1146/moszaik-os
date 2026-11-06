@@ -491,25 +491,133 @@
 
                 <!-- Files Grid -->
                 <div id="file-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                    <!-- Initial Default Sample Files -->
-                    <div onclick="previewDriveItem('Dokumen Mouszaik.docx', 'document', '1.4 MB')" class="bg-slate-900 border border-slate-800 hover:border-cyan-500/50 p-3 rounded-xl flex flex-col items-center text-center cursor-pointer hover:scale-102 transition group">
-                        <i class="fa-solid fa-file-word text-4xl text-blue-400 my-2 group-hover:scale-110 transition"></i>
-                        <span class="text-xs font-medium text-slate-200 truncate w-full">Dokumen Mouszaik.docx</span>
-                        <span class="text-[10px] text-slate-400 mt-1">1.4 MB</span>
-                    </div>
-
-                    <div onclick="previewDriveItem('Desain_UI_Concept.png', 'image', '3.8 MB')" class="bg-slate-900 border border-slate-800 hover:border-cyan-500/50 p-3 rounded-xl flex flex-col items-center text-center cursor-pointer hover:scale-102 transition group">
-                        <i class="fa-solid fa-file-image text-4xl text-emerald-400 my-2 group-hover:scale-110 transition"></i>
-                        <span class="text-xs font-medium text-slate-200 truncate w-full">Desain_UI_Concept.png</span>
-                        <span class="text-[10px] text-slate-400 mt-1">3.8 MB</span>
-                    </div>
-
-                    <div onclick="previewDriveItem('Proyek_Final.pdf', 'pdf', '5.2 MB')" class="bg-slate-900 border border-slate-800 hover:border-cyan-500/50 p-3 rounded-xl flex flex-col items-center text-center cursor-pointer hover:scale-102 transition group">
-                        <i class="fa-solid fa-file-pdf text-4xl text-rose-400 my-2 group-hover:scale-110 transition"></i>
-                        <span class="text-xs font-medium text-slate-200 truncate w-full">Proyek_Final.pdf</span>
-                        <span class="text-[10px] text-slate-400 mt-1">5.2 MB</span>
-                    </div>
+                    <!-- Files will be loaded dynamically from persistent storage -->
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WINDOW UI: Music Player with Wave Visualizer -->
+    <div id="music-window" class="hidden fixed inset-4 md:inset-x-auto md:inset-y-12 md:right-10 md:w-96 z-50 flex flex-col bg-slate-950/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-cyan-500/30 overflow-hidden">
+        
+        <!-- Music Window Header -->
+        <div class="bg-slate-900/90 px-5 py-3 flex items-center justify-between border-b border-slate-800/80">
+            <div class="flex items-center space-x-2.5">
+                <i class="fa-solid fa-compact-disc text-cyan-400 animate-spin text-lg" style="animation-duration: 4s;"></i>
+                <span class="text-white font-bold text-sm tracking-wide">Mouszaik Audio</span>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <button onclick="fetchGitHubMusicPrompt()" class="text-xs text-cyan-300 hover:bg-slate-800 p-1.5 rounded-lg border border-cyan-500/30 transition flex items-center gap-1" title="Hubungkan Folder GitHub (music3)">
+                    <i class="fa-brands fa-github text-sm"></i>
+                    <span class="hidden sm:inline">GitHub</span>
+                </button>
+                <button onclick="closeMusic()" class="w-5 h-5 rounded-full bg-rose-500 hover:bg-rose-600 flex items-center justify-center text-white text-[9px] font-bold transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Wave Canvas Visualizer & Album Art -->
+        <div class="relative bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950 p-5 flex flex-col items-center justify-center border-b border-slate-800/60 overflow-hidden">
+            <!-- Dynamic Wave Canvas Background -->
+            <canvas id="wave-canvas" class="absolute inset-0 w-full h-full opacity-60 pointer-events-none"></canvas>
+
+            <!-- Album Cover Art -->
+            <div class="relative z-10 w-28 h-28 rounded-2xl overflow-hidden shadow-2xl border-2 border-cyan-400/30 mb-3 group">
+                <img id="music-cover" src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&auto=format&fit=crop" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-slate-950/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                    <i class="fa-solid fa-music text-2xl text-cyan-300"></i>
+                </div>
+            </div>
+
+            <!-- Song Info -->
+            <div class="relative z-10 text-center w-full px-2">
+                <h3 id="music-title" class="text-base font-bold text-white truncate">Pilih Lagu...</h3>
+                <p id="music-artist" class="text-xs text-cyan-300/80 truncate mt-0.5">Mouszaik Player</p>
+            </div>
+        </div>
+
+        <!-- Controls & Progress -->
+        <div class="p-4 bg-slate-950 flex flex-col space-y-3">
+            <!-- Progress Bar -->
+            <div class="w-full">
+                <div class="flex justify-between text-[10px] text-slate-400 font-mono mb-1">
+                    <span id="music-time-curr">0:00</span>
+                    <span id="music-time-dur">0:00</span>
+                </div>
+                <input type="range" id="music-progress" min="0" max="100" value="0" oninput="seekMusic(this.value)"
+                       class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+            </div>
+
+            <!-- Buttons Controls -->
+            <div class="flex items-center justify-between px-4">
+                <button onclick="toggleShuffle()" id="btn-shuffle" class="text-slate-400 hover:text-cyan-300 text-xs transition">
+                    <i class="fa-solid fa-shuffle"></i>
+                </button>
+
+                <div class="flex items-center space-x-4">
+                    <button onclick="prevMusic()" class="text-slate-300 hover:text-white text-base transition">
+                        <i class="fa-solid fa-backward-step"></i>
+                    </button>
+                    <button onclick="togglePlayMusic()" id="btn-play-pause" class="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white flex items-center justify-center shadow-lg transition active:scale-95 text-base">
+                        <i class="fa-solid fa-play ml-0.5"></i>
+                    </button>
+                    <button onclick="nextMusic()" class="text-slate-300 hover:text-white text-base transition">
+                        <i class="fa-solid fa-forward-step"></i>
+                    </button>
+                </div>
+
+                <div class="flex items-center space-x-1.5 text-slate-400">
+                    <i class="fa-solid fa-volume-high text-xs"></i>
+                    <input type="range" id="music-volume" min="0" max="1" step="0.05" value="0.8" oninput="setMusicVolume(this.value)"
+                           class="w-14 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+                </div>
+            </div>
+        </div>
+
+        <!-- GitHub / Local Playlist View -->
+        <div class="flex-1 bg-slate-900/60 p-3 overflow-y-auto border-t border-slate-800/80">
+            <div class="flex items-center justify-between mb-2 px-1">
+                <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-list-ul text-cyan-400"></i> Playlist (<span id="playlist-count">0</span>)
+                </span>
+                <span id="github-source-tag" class="text-[10px] text-cyan-400 bg-cyan-950 border border-cyan-800/60 px-2 py-0.5 rounded-full truncate max-w-[150px]">
+                    Folder: music3
+                </span>
+            </div>
+
+            <div id="playlist-container" class="space-y-1.5">
+                <!-- Tracks will render here dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu Options (3-dots Dropdown) -->
+    <div id="context-menu" class="hidden fixed z-50 bg-slate-900 border border-slate-700/80 shadow-2xl rounded-xl py-1.5 w-44 text-xs text-slate-200 backdrop-blur-lg">
+        <button onclick="handleRenameContextFile()" class="w-full px-3 py-2 text-left hover:bg-cyan-600/30 hover:text-cyan-300 flex items-center gap-2 transition">
+            <i class="fa-solid fa-pen-to-square text-cyan-400"></i> Ganti Nama
+        </button>
+        <button onclick="handleDownloadContextFile()" class="w-full px-3 py-2 text-left hover:bg-emerald-600/30 hover:text-emerald-300 flex items-center gap-2 transition">
+            <i class="fa-solid fa-download text-emerald-400"></i> Unduh File
+        </button>
+        <div class="my-1 border-t border-slate-800"></div>
+        <button onclick="handleDeleteContextFile()" class="w-full px-3 py-2 text-left hover:bg-rose-600/30 hover:text-rose-300 flex items-center gap-2 transition">
+            <i class="fa-solid fa-trash-can text-rose-400"></i> Hapus File
+        </button>
+    </div>
+
+    <!-- Custom Rename Dialog Modal (No Alert) -->
+    <div id="rename-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-2xl p-5 shadow-2xl text-slate-100 flex flex-col">
+            <h3 class="text-base font-bold text-white mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-pen-to-square text-cyan-400"></i> Ganti Nama Berkas
+            </h3>
+            <p class="text-xs text-slate-400 mb-3">Masukkan nama baru untuk file ini:</p>
+            <input type="text" id="rename-input" class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500 mb-4">
+            <div class="flex items-center justify-end space-x-2">
+                <button onclick="closeRenameModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold">Batal</button>
+                <button onclick="saveRenamedFile()" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-semibold">Simpan</button>
             </div>
         </div>
     </div>
@@ -548,6 +656,11 @@
                     <path fill="#FFBA00" d="M87.3 78L62.5 35.3H37.7L62.5 78h24.8z"/>
                 </svg>
             </button>
+
+            <button onclick="toggleMusic()" class="p-2 rounded-xl hover:bg-white/20 transition group relative" title="Mouszaik Music Player">
+                <i class="fa-solid fa-music text-cyan-200 text-xl group-hover:scale-110 transition"></i>
+                <span id="music-indicator" class="hidden absolute top-1 right-1 w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+            </button>
         </div>
     </footer>
 
@@ -573,6 +686,14 @@
         }
         setInterval(updateClock, 1000);
         updateClock();
+
+        // Close dropdown context menu on window click
+        window.addEventListener('click', (e) => {
+            const ctxMenu = document.getElementById('context-menu');
+            if (ctxMenu && !ctxMenu.contains(e.target)) {
+                ctxMenu.classList.add('hidden');
+            }
+        });
 
         // -------------------------------------------------------------
         // FULL FUNCTIONAL GOOGLE CHROME MULTI-TAB & SEARCH SYSTEM
@@ -687,7 +808,6 @@
             const tab = getActiveTab();
             let val = inputVal.trim();
 
-            // Check if input is a valid URL
             let isUrl = false;
             if (val.startsWith('http://') || val.startsWith('https://')) {
                 isUrl = true;
@@ -713,7 +833,6 @@
             renderActiveTabContent();
         }
 
-        // Live Search Execution via Wikipedia and Open Search APIs
         async function executeLiveWebSearch(query) {
             const queryTextEl = document.getElementById('search-query-text');
             const resultsListEl = document.getElementById('search-results-list');
@@ -723,7 +842,6 @@
             resultsListEl.innerHTML = `<div class="p-8 text-center text-slate-400"><i class="fa-solid fa-spinner fa-spin text-2xl text-cyan-400 mb-2"></i><p class="text-xs">Mencari di seluruh web...</p></div>`;
 
             try {
-                // Fetch live search results from Wikipedia API + DuckDuckGo fallback format
                 const response = await fetch(`https://id.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*`);
                 const data = await response.json();
                 
@@ -731,7 +849,6 @@
                 resultsCountEl.innerText = `${searchResults.length} hasil ditemukan`;
                 resultsListEl.innerHTML = '';
 
-                // DuckDuckGo direct link option
                 const ddgCard = document.createElement('div');
                 ddgCard.className = 'bg-slate-800/80 border border-cyan-500/30 p-4 rounded-xl hover:border-cyan-400 transition cursor-pointer shadow-md';
                 ddgCard.onclick = () => submitUrlOrSearch(`https://duckduckgo.com/?q=${encodeURIComponent(query)}`);
@@ -849,9 +966,90 @@
         }
 
         // -------------------------------------------------------------
-        // GOOGLE DRIVE FILE UPLOAD & MANAGEMENT LOGIC
+        // GOOGLE DRIVE PERSISTENT STORAGE, CONTEXT MENU, RENAME & DOWNLOAD LOGIC
         // -------------------------------------------------------------
-        let currentStorageUsedMB = 10.4; // Initial MBs
+        const DEFAULT_DRIVE_FILES = [
+            { id: 'file_1', name: 'Dokumen Mouszaik.docx', type: 'document', size: '1.4 MB', sizeMB: 1.4, content: 'Isi Dokumen Mouszaik: Ekosistem desktop modern berbasis cloud interface.' },
+            { id: 'file_2', name: 'Desain_UI_Concept.png', type: 'image', size: '3.8 MB', sizeMB: 3.8, content: '' },
+            { id: 'file_3', name: 'Proyek_Final.pdf', type: 'pdf', size: '5.2 MB', sizeMB: 5.2, content: 'Dokumen PDF Proyek Final disiapkan untuk presentasi.' }
+        ];
+
+        let driveFiles = [];
+        let selectedFileForContext = null;
+
+        function loadDriveFiles() {
+            try {
+                const saved = localStorage.getItem('mouszaik_drive_files');
+                if (saved) {
+                    driveFiles = JSON.parse(saved);
+                } else {
+                    driveFiles = [...DEFAULT_DRIVE_FILES];
+                    saveDriveFiles();
+                }
+            } catch (e) {
+                driveFiles = [...DEFAULT_DRIVE_FILES];
+            }
+            renderDriveFiles();
+        }
+
+        function saveDriveFiles() {
+            try {
+                localStorage.setItem('mouszaik_drive_files', JSON.stringify(driveFiles));
+            } catch (e) {
+                console.warn('Storage quota limit reached for localStorage', e);
+            }
+        }
+
+        function renderDriveFiles() {
+            const grid = document.getElementById('file-grid');
+            grid.innerHTML = '';
+
+            let totalMB = 0;
+
+            driveFiles.forEach(file => {
+                totalMB += (file.sizeMB || 1.0);
+
+                let iconClass = 'fa-file text-cyan-400';
+                if (file.type === 'image' || file.type?.startsWith('image/')) iconClass = 'fa-file-image text-emerald-400';
+                else if (file.type === 'video' || file.type?.startsWith('video/')) iconClass = 'fa-file-video text-purple-400';
+                else if (file.type === 'pdf' || file.type?.includes('pdf')) iconClass = 'fa-file-pdf text-rose-400';
+                else if (file.type === 'document' || file.type?.includes('word')) iconClass = 'fa-file-word text-blue-400';
+                else if (file.type?.includes('zip') || file.type?.includes('rar')) iconClass = 'fa-file-zipper text-yellow-400';
+                else if (file.type?.includes('text') || file.name.endsWith('.js') || file.name.endsWith('.html')) iconClass = 'fa-file-code text-cyan-300';
+
+                const fileCard = document.createElement('div');
+                fileCard.className = 'bg-slate-900 border border-slate-800 hover:border-cyan-500/50 p-3 rounded-xl flex flex-col items-center text-center cursor-pointer hover:scale-102 transition group relative';
+                
+                fileCard.onclick = (e) => {
+                    // Prevent triggering preview if clicking dots
+                    if (e.target.closest('.three-dots-btn')) return;
+                    previewDriveFileItem(file);
+                };
+
+                fileCard.innerHTML = `
+                    <!-- 3-Dots Menu Button -->
+                    <button onclick="openContextMenu('${file.id}', event)" class="three-dots-btn absolute top-2 right-2 w-6 h-6 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">
+                        <i class="fa-solid fa-ellipsis-vertical text-xs"></i>
+                    </button>
+
+                    <i class="fa-solid ${iconClass} text-4xl my-2 group-hover:scale-110 transition"></i>
+                    <span class="text-xs font-medium text-slate-200 truncate w-full px-1" title="${file.name}">${file.name}</span>
+                    <span class="text-[10px] text-slate-400 mt-1">${file.size}</span>
+                `;
+
+                grid.appendChild(fileCard);
+            });
+
+            updateStorageMeter(totalMB);
+        }
+
+        function updateStorageMeter(usedMB) {
+            const usedGB = (usedMB / 1024 + 1.2).toFixed(2);
+            const percentage = Math.min(100, Math.round((usedGB / 15) * 100));
+
+            document.getElementById('storage-text').innerText = `${usedGB} GB / 15 GB`;
+            document.getElementById('storage-bar').style.width = `${percentage}%`;
+        }
 
         function triggerFileUpload() {
             document.getElementById('drive-file-input').click();
@@ -860,43 +1058,31 @@
         function handleFileUpload(files) {
             if (!files || files.length === 0) return;
 
-            const grid = document.getElementById('file-grid');
-
             Array.from(files).forEach(file => {
-                const fileSizeMB = (file.size / (1024 * 1024)).toFixed(1);
-                currentStorageUsedMB += parseFloat(fileSizeMB);
+                const fileSizeMB = parseFloat((file.size / (1024 * 1024)).toFixed(2)) || 0.1;
+                const formattedSize = file.size > 1024 * 1024 ? `${fileSizeMB} MB` : `${(file.size / 1024).toFixed(1)} KB`;
 
-                const fileCard = document.createElement('div');
-                fileCard.className = 'bg-slate-900 border border-slate-800 hover:border-cyan-500/50 p-3 rounded-xl flex flex-col items-center text-center cursor-pointer hover:scale-102 transition group';
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const newFile = {
+                        id: 'file_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                        name: file.name,
+                        type: file.type || 'document',
+                        size: formattedSize,
+                        sizeMB: fileSizeMB,
+                        content: e.target.result // Base64 or text preview string
+                    };
+                    driveFiles.unshift(newFile);
+                    saveDriveFiles();
+                    renderDriveFiles();
+                };
 
-                let iconClass = 'fa-file text-cyan-400';
-                if (file.type.startsWith('image/')) iconClass = 'fa-file-image text-emerald-400';
-                else if (file.type.startsWith('video/')) iconClass = 'fa-file-video text-purple-400';
-                else if (file.type.startsWith('audio/')) iconClass = 'fa-file-audio text-amber-400';
-                else if (file.type.includes('pdf')) iconClass = 'fa-file-pdf text-rose-400';
-                else if (file.type.includes('zip') || file.type.includes('rar')) iconClass = 'fa-file-zipper text-yellow-400';
-                else if (file.type.includes('text') || file.name.endsWith('.js') || file.name.endsWith('.html')) iconClass = 'fa-file-code text-cyan-300';
-
-                fileCard.onclick = () => previewUploadedFile(file);
-
-                fileCard.innerHTML = `
-                    <i class="fa-solid ${iconClass} text-4xl my-2 group-hover:scale-110 transition"></i>
-                    <span class="text-xs font-medium text-slate-200 truncate w-full" title="${file.name}">${file.name}</span>
-                    <span class="text-[10px] text-slate-400 mt-1">${fileSizeMB} MB</span>
-                `;
-
-                grid.prepend(fileCard);
+                if (file.type.startsWith('image/')) {
+                    reader.readAsDataURL(file);
+                } else {
+                    reader.readAsText(file);
+                }
             });
-
-            updateStorageMeter();
-        }
-
-        function updateStorageMeter() {
-            const usedGB = (currentStorageUsedMB / 1024 + 1.2).toFixed(2);
-            const percentage = Math.min(100, Math.round((usedGB / 15) * 100));
-
-            document.getElementById('storage-text').innerText = `${usedGB} GB / 15 GB`;
-            document.getElementById('storage-bar').style.width = `${percentage}%`;
         }
 
         // Drag & Drop Handling
@@ -920,45 +1106,90 @@
             }
         }
 
-        // Preview File Functions
-        function previewDriveItem(fileName, type, size) {
-            document.getElementById('modal-file-name').innerText = fileName;
-            document.getElementById('modal-file-size').innerText = `Ukuran: ${size}`;
-            
-            const iconContainer = document.getElementById('modal-file-icon');
-            const previewContainer = document.getElementById('modal-preview-container');
-            
-            if (type === 'image') {
-                iconContainer.innerHTML = `<i class="fa-solid fa-file-image text-5xl text-emerald-400"></i>`;
-                previewContainer.innerHTML = `<div class="text-center py-6 text-slate-400"><i class="fa-solid fa-image text-4xl mb-2 text-emerald-400/60 block"></i>[Pratinjau Gambar Sampel: ${fileName}]</div>`;
-            } else if (type === 'pdf') {
-                iconContainer.innerHTML = `<i class="fa-solid fa-file-pdf text-5xl text-rose-400"></i>`;
-                previewContainer.innerHTML = `<p class="text-slate-300">Dokumen PDF "${fileName}" siap diunduh atau dibaca dalam tampilan dokumen full-screen.</p>`;
-            } else {
-                iconContainer.innerHTML = `<i class="fa-solid fa-file-word text-5xl text-blue-400"></i>`;
-                previewContainer.innerHTML = `<p class="text-slate-300">Isi Dokumen Mouszaik: Ekosistem desktop modern berbasis cloud interface.</p>`;
-            }
+        // 3-Dots Context Menu & Action Handlers
+        function openContextMenu(fileId, event) {
+            event.stopPropagation();
+            selectedFileForContext = driveFiles.find(f => f.id === fileId);
+            if (!selectedFileForContext) return;
 
-            document.getElementById('file-preview-modal').classList.remove('hidden');
+            const ctxMenu = document.getElementById('context-menu');
+            ctxMenu.style.top = `${event.clientY + 5}px`;
+            ctxMenu.style.left = `${Math.min(window.innerWidth - 180, event.clientX - 100)}px`;
+            ctxMenu.classList.remove('hidden');
         }
 
-        function previewUploadedFile(file) {
+        function handleRenameContextFile() {
+            document.getElementById('context-menu').classList.add('hidden');
+            if (!selectedFileForContext) return;
+
+            document.getElementById('rename-input').value = selectedFileForContext.name;
+            document.getElementById('rename-modal').classList.remove('hidden');
+        }
+
+        function closeRenameModal() {
+            document.getElementById('rename-modal').classList.add('hidden');
+        }
+
+        function saveRenamedFile() {
+            const newName = document.getElementById('rename-input').value.trim();
+            if (newName && selectedFileForContext) {
+                selectedFileForContext.name = newName;
+                saveDriveFiles();
+                renderDriveFiles();
+            }
+            closeRenameModal();
+        }
+
+        function handleDownloadContextFile() {
+            document.getElementById('context-menu').classList.add('hidden');
+            if (!selectedFileForContext) return;
+
+            const file = selectedFileForContext;
+            const element = document.createElement('a');
+            
+            if (file.content && file.content.startsWith('data:')) {
+                element.setAttribute('href', file.content);
+            } else {
+                const blob = new Blob([file.content || 'Isi file ' + file.name], { type: 'text/plain' });
+                element.setAttribute('href', URL.createObjectURL(blob));
+            }
+            
+            element.setAttribute('download', file.name);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        }
+
+        function handleDeleteContextFile() {
+            document.getElementById('context-menu').classList.add('hidden');
+            if (!selectedFileForContext) return;
+
+            driveFiles = driveFiles.filter(f => f.id !== selectedFileForContext.id);
+            saveDriveFiles();
+            renderDriveFiles();
+        }
+
+        // Preview File Function
+        function previewDriveFileItem(file) {
             document.getElementById('modal-file-name').innerText = file.name;
-            document.getElementById('modal-file-size').innerText = `Ukuran: ${(file.size / 1024).toFixed(1)} KB`;
+            document.getElementById('modal-file-size').innerText = `Ukuran: ${file.size}`;
             
             const iconContainer = document.getElementById('modal-file-icon');
             const previewContainer = document.getElementById('modal-preview-container');
 
-            if (file.type.startsWith('image/')) {
+            if (file.content && file.content.startsWith('data:image')) {
                 iconContainer.innerHTML = `<i class="fa-solid fa-file-image text-5xl text-emerald-400"></i>`;
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewContainer.innerHTML = `<img src="${e.target.result}" class="max-h-48 rounded-lg mx-auto object-contain">`;
-                };
-                reader.readAsDataURL(file);
+                previewContainer.innerHTML = `<img src="${file.content}" class="max-h-48 rounded-lg mx-auto object-contain">`;
+            } else if (file.type === 'image') {
+                iconContainer.innerHTML = `<i class="fa-solid fa-file-image text-5xl text-emerald-400"></i>`;
+                previewContainer.innerHTML = `<div class="text-center py-6 text-slate-400"><i class="fa-solid fa-image text-4xl mb-2 text-emerald-400/60 block"></i>[Pratinjau Gambar Sampel: ${file.name}]</div>`;
+            } else if (file.type === 'pdf') {
+                iconContainer.innerHTML = `<i class="fa-solid fa-file-pdf text-5xl text-rose-400"></i>`;
+                previewContainer.innerHTML = `<p class="text-slate-300">${file.content || 'Dokumen PDF siap dibaca.'}</p>`;
             } else {
                 iconContainer.innerHTML = `<i class="fa-solid fa-file text-5xl text-cyan-400"></i>`;
-                previewContainer.innerText = `Berkas berhasil diunggah ke Google Drive faudzansmanten@gmail.com.\nNama: ${file.name}\nTipe: ${file.type || 'Biner/Dokumen'}`;
+                previewContainer.innerText = file.content || `Berkas tersimpan di Google Drive faudzansmanten@gmail.com.\nNama: ${file.name}`;
             }
 
             document.getElementById('file-preview-modal').classList.remove('hidden');
@@ -968,9 +1199,302 @@
             document.getElementById('file-preview-modal').classList.add('hidden');
         }
 
-        // Initialize Chrome Tabs on initial load
+        // -------------------------------------------------------------
+        // MUSIC PLAYER & FLUID WAVE VISUALIZER ENGINE
+        // -------------------------------------------------------------
+        const DEFAULT_PLAYLIST = [
+            {
+                title: "Cyberpunk Ambient Wave",
+                artist: "Mouszaik Sound Labs",
+                url: "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=ambient-piano-amp-strings-10711.mp3",
+                cover: "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=300&auto=format&fit=crop"
+            },
+            {
+                title: "Lo-Fi Beats for Coding",
+                artist: "Chill Hop Collective",
+                url: "https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=lofi-study-112191.mp3",
+                cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&auto=format&fit=crop"
+            },
+            {
+                title: "Synthwave Horizon",
+                artist: "Future Motion",
+                url: "https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=electronic-future-beats-117997.mp3",
+                cover: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop"
+            }
+        ];
+
+        let playlist = [...DEFAULT_PLAYLIST];
+        let currentTrackIdx = 0;
+        let isPlaying = false;
+        let audioObj = new Audio();
+        let audioCtx = null;
+        let analyser = null;
+        let audioSource = null;
+        let waveAnimFrame = null;
+        let wavePhase = 0;
+
+        const musicWin = document.getElementById('music-window');
+
+        function toggleMusic() {
+            if (musicWin.classList.contains('hidden')) {
+                openMusic();
+            } else {
+                closeMusic();
+            }
+        }
+
+        function openMusic() {
+            musicWin.classList.remove('hidden');
+            musicWin.classList.add('window-appear');
+            initWaveCanvas();
+            if (playlist.length > 0 && !audioObj.src) {
+                loadTrack(0, false);
+            }
+        }
+
+        function closeMusic() {
+            musicWin.classList.remove('window-appear');
+            musicWin.classList.add('window-disappear');
+            setTimeout(() => {
+                musicWin.classList.add('hidden');
+                musicWin.classList.remove('window-disappear');
+            }, 200);
+        }
+
+        function loadTrack(index, autoPlay = true) {
+            if (index < 0 || index >= playlist.length) return;
+            currentTrackIdx = index;
+            const track = playlist[currentTrackIdx];
+
+            audioObj.src = track.url;
+            audioObj.crossOrigin = "anonymous";
+            
+            document.getElementById('music-title').innerText = track.title;
+            document.getElementById('music-artist').innerText = track.artist;
+            document.getElementById('music-cover').src = track.cover || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&auto=format&fit=crop';
+
+            renderPlaylistItems();
+
+            if (autoPlay) {
+                playMusic();
+            }
+        }
+
+        function togglePlayMusic() {
+            if (isPlaying) {
+                pauseMusic();
+            } else {
+                playMusic();
+            }
+        }
+
+        function playMusic() {
+            initAudioContext();
+            audioObj.play().then(() => {
+                isPlaying = true;
+                updatePlayPauseButton();
+                document.getElementById('music-indicator').classList.remove('hidden');
+            }).catch(err => {
+                console.warn('Playback error:', err);
+            });
+        }
+
+        function pauseMusic() {
+            audioObj.pause();
+            isPlaying = false;
+            updatePlayPauseButton();
+            document.getElementById('music-indicator').classList.add('hidden');
+        }
+
+        function nextMusic() {
+            const nextIdx = (currentTrackIdx + 1) % playlist.length;
+            loadTrack(nextIdx, true);
+        }
+
+        function prevMusic() {
+            const prevIdx = (currentTrackIdx - 1 + playlist.length) % playlist.length;
+            loadTrack(prevIdx, true);
+        }
+
+        function seekMusic(percent) {
+            if (audioObj.duration) {
+                audioObj.currentTime = (percent / 100) * audioObj.duration;
+            }
+        }
+
+        function setMusicVolume(val) {
+            audioObj.volume = parseFloat(val);
+        }
+
+        function updatePlayPauseButton() {
+            const btn = document.getElementById('btn-play-pause');
+            if (isPlaying) {
+                btn.innerHTML = `<i class="fa-solid fa-pause"></i>`;
+            } else {
+                btn.innerHTML = `<i class="fa-solid fa-play ml-0.5"></i>`;
+            }
+        }
+
+        function renderPlaylistItems() {
+            const container = document.getElementById('playlist-container');
+            document.getElementById('playlist-count').innerText = playlist.length;
+            container.innerHTML = '';
+
+            playlist.forEach((track, i) => {
+                const isCurrent = i === currentTrackIdx;
+                const item = document.createElement('div');
+                item.className = `p-2 rounded-xl flex items-center justify-between cursor-pointer transition select-none ${isCurrent ? 'bg-cyan-950/80 border border-cyan-500/40 text-cyan-200 shadow' : 'bg-slate-900/40 border border-slate-800/60 hover:bg-slate-800/60 text-slate-300'}`;
+                item.onclick = () => loadTrack(i, true);
+
+                item.innerHTML = `
+                    <div class="flex items-center space-x-2.5 overflow-hidden pr-2">
+                        <div class="w-7 h-7 rounded-lg overflow-hidden flex-shrink-0 bg-slate-800">
+                            <img src="${track.cover || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&auto=format&fit=crop'}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="overflow-hidden">
+                            <p class="text-xs font-semibold truncate ${isCurrent ? 'text-cyan-300' : 'text-slate-200'}">${track.title}</p>
+                            <p class="text-[10px] text-slate-400 truncate">${track.artist}</p>
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0 text-xs">
+                        ${isCurrent && isPlaying ? '<i class="fa-solid fa-volume-high text-cyan-400 animate-pulse"></i>' : (isCurrent ? '<i class="fa-solid fa-play text-cyan-400 text-[10px]"></i>' : '')}
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // Web Audio API & Wave Visualizer Rendering
+        function initAudioContext() {
+            if (audioCtx) return;
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioCtx.createAnalyser();
+                analyser.fftSize = 64;
+
+                audioSource = audioCtx.createMediaElementSource(audioObj);
+                audioSource.connect(analyser);
+                analyser.connect(audioCtx.destination);
+            } catch (e) {
+                console.warn('Web Audio API initialized in fallback mode', e);
+            }
+        }
+
+        function initWaveCanvas() {
+            const canvas = document.getElementById('wave-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            function drawWave() {
+                waveAnimFrame = requestAnimationFrame(drawWave);
+                
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+                
+                const width = canvas.width;
+                const height = canvas.height;
+
+                ctx.clearRect(0, 0, width, height);
+
+                let audioAmp = 15;
+                if (analyser && isPlaying) {
+                    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+                    analyser.getByteFrequencyData(dataArray);
+                    let avg = 0;
+                    for (let i = 0; i < dataArray.length; i++) avg += dataArray[i];
+                    audioAmp = (avg / dataArray.length) * 0.4 + 10;
+                } else if (isPlaying) {
+                    audioAmp = 25;
+                }
+
+                wavePhase += 0.04;
+
+                // Draw 3 layers of smooth fluid sine waves (not bars)
+                const waves = [
+                    { color: 'rgba(6, 182, 212, 0.4)', speed: 1.0, freq: 0.015, amp: audioAmp },
+                    { color: 'rgba(56, 189, 248, 0.3)', speed: 1.3, freq: 0.02, amp: audioAmp * 0.7 },
+                    { color: 'rgba(168, 85, 247, 0.25)', speed: 0.8, freq: 0.01, amp: audioAmp * 1.2 }
+                ];
+
+                waves.forEach((w) => {
+                    ctx.beginPath();
+                    ctx.fillStyle = w.color;
+
+                    const yOffset = height * 0.65;
+                    ctx.moveTo(0, height);
+                    ctx.lineTo(0, yOffset);
+
+                    for (let x = 0; x <= width; x += 10) {
+                        const y = Math.sin(x * w.freq + wavePhase * w.speed) * w.amp + yOffset;
+                        ctx.lineTo(x, y);
+                    }
+
+                    ctx.lineTo(width, height);
+                    ctx.closePath();
+                    ctx.fill();
+                });
+            }
+
+            if (!waveAnimFrame) drawWave();
+        }
+
+        // GitHub Folder Fetch Prompt (for music3 repo)
+        async function fetchGitHubMusicPrompt() {
+            const repoPath = prompt("Masukkan username/repository GitHub kamu (contoh: faudzan/mouszaik-app):", "faudzansmanten/my-music");
+            if (!repoPath) return;
+
+            const apiUrl = `https://api.github.com/repos/${repoPath.trim()}/contents/music3`;
+
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error("Folder music3 tidak ditemukan di repo ini");
+
+                const files = await response.json();
+                const audioFiles = files.filter(f => f.name.match(/\.(mp3|wav|ogg|m4a)$/i));
+
+                if (audioFiles.length === 0) {
+                    alert("Tidak ada file lagu (.mp3, .wav, .ogg) di dalam folder music3.");
+                    return;
+                }
+
+                playlist = audioFiles.map(f => ({
+                    title: f.name.replace(/\.[^/.]+$/, ""),
+                    artist: `GitHub: ${repoPath}`,
+                    url: f.download_url,
+                    cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&auto=format&fit=crop"
+                }));
+
+                document.getElementById('github-source-tag').innerText = `GitHub: ${repoPath}/music3`;
+                loadTrack(0, true);
+            } catch (err) {
+                alert("Gagal memuat lagu dari GitHub: " + err.message);
+            }
+        }
+
+        // Audio Object Time Event Listeners
+        audioObj.ontimeupdate = () => {
+            if (audioObj.duration) {
+                const pct = (audioObj.currentTime / audioObj.duration) * 100;
+                document.getElementById('music-progress').value = pct;
+                
+                const curM = Math.floor(audioObj.currentTime / 60);
+                const curS = Math.floor(audioObj.currentTime % 60).toString().padStart(2, '0');
+                const durM = Math.floor(audioObj.duration / 60);
+                const durS = Math.floor(audioObj.duration % 60).toString().padStart(2, '0');
+
+                document.getElementById('music-time-curr').innerText = `${curM}:${curS}`;
+                document.getElementById('music-time-dur').innerText = `${durM}:${durS}`;
+            }
+        };
+
+        audioObj.onended = () => {
+            nextMusic();
+        };
+
+        // Initialize Chrome Tabs & Drive Persistent Storage on load
         window.addEventListener('DOMContentLoaded', () => {
             initChromeTabs();
+            loadDriveFiles();
         });
     </script>
 </body>
