@@ -802,6 +802,190 @@
         });
 
         // -------------------------------------------------------------
+        // WINDOW TOGGLES: CHROME & GOOGLE DRIVE
+        // -------------------------------------------------------------
+        const chromeWin = document.getElementById('chrome-window');
+        const driveWin = document.getElementById('drive-window');
+
+        function openChrome() {
+            chromeWin.classList.remove('hidden');
+            chromeWin.classList.remove('window-disappear');
+            chromeWin.classList.add('window-appear');
+        }
+
+        function closeChrome() {
+            chromeWin.classList.remove('window-appear');
+            chromeWin.classList.add('window-disappear');
+            setTimeout(() => {
+                chromeWin.classList.add('hidden');
+            }, 200);
+        }
+
+        function openDrive() {
+            driveWin.classList.remove('hidden');
+            driveWin.classList.remove('window-disappear');
+            driveWin.classList.add('window-appear');
+            renderDriveFiles();
+        }
+
+        function closeDrive() {
+            driveWin.classList.remove('window-appear');
+            driveWin.classList.add('window-disappear');
+            setTimeout(() => {
+                driveWin.classList.add('hidden');
+            }, 200);
+        }
+
+        // -------------------------------------------------------------
+        // CHROME BROWSER ENGINE & TABS SYSTEM
+        // -------------------------------------------------------------
+        let chromeTabs = [
+            { id: 1, title: 'Google', url: 'https://www.google.com', type: 'home' }
+        ];
+        let activeTabId = 1;
+
+        function initChromeTabs() {
+            renderTabs();
+            switchTab(activeTabId);
+        }
+
+        function renderTabs() {
+            const tabsBar = document.getElementById('tabs-bar');
+            if (!tabsBar) return;
+            tabsBar.innerHTML = '';
+
+            chromeTabs.forEach(tab => {
+                const isActive = tab.id === activeTabId;
+                const tabEl = document.createElement('div');
+                tabEl.className = `flex items-center space-x-2 px-3 py-1 rounded-t-lg text-xs cursor-pointer transition select-none flex-shrink-0 max-w-[140px] ${isActive ? 'tab-active' : 'bg-slate-900 text-slate-400 hover:bg-slate-800 hover:text-slate-200'}`;
+                tabEl.onclick = () => switchTab(tab.id);
+
+                tabEl.innerHTML = `
+                    <i class="fa-solid fa-globe text-[10px] ${isActive ? 'text-cyan-400' : 'text-slate-500'}"></i>
+                    <span class="truncate text-[11px] font-medium">${tab.title}</span>
+                    ${chromeTabs.length > 1 ? `<button onclick="event.stopPropagation(); closeTab(${tab.id})" class="hover:bg-slate-700/60 p-0.5 rounded-full text-[9px] text-slate-400 hover:text-white ml-auto"><i class="fa-solid fa-xmark"></i></button>` : ''}
+                `;
+                tabsBar.appendChild(tabEl);
+            });
+        }
+
+        function switchTab(id) {
+            activeTabId = id;
+            const tab = chromeTabs.find(t => t.id === id);
+            if (!tab) return;
+
+            renderTabs();
+
+            const urlInput = document.getElementById('url-input');
+            if (urlInput) urlInput.value = tab.url;
+
+            const homeView = document.getElementById('view-home');
+            const resultsView = document.getElementById('view-results');
+            const iframeView = document.getElementById('view-iframe');
+
+            homeView.classList.add('hidden');
+            resultsView.classList.add('hidden');
+            iframeView.classList.add('hidden');
+
+            if (tab.type === 'home') {
+                homeView.classList.remove('hidden');
+            } else if (tab.type === 'search') {
+                resultsView.classList.remove('hidden');
+                displaySearchResults(tab.query);
+            } else if (tab.type === 'iframe') {
+                iframeView.classList.remove('hidden');
+                const frame = document.getElementById('browser-frame');
+                const loadingEl = document.getElementById('iframe-loading');
+                if (loadingEl) loadingEl.classList.remove('hidden');
+                if (frame && frame.src !== tab.url) {
+                    frame.src = tab.url;
+                }
+            }
+        }
+
+        function createNewTab(url = 'https://www.google.com', title = 'Google', type = 'home') {
+            const newId = Date.now();
+            chromeTabs.push({ id: newId, title, url, type });
+            switchTab(newId);
+        }
+
+        function closeTab(id) {
+            if (chromeTabs.length <= 1) return;
+            chromeTabs = chromeTabs.filter(t => t.id !== id);
+            if (activeTabId === id) {
+                activeTabId = chromeTabs[chromeTabs.length - 1].id;
+            }
+            switchTab(activeTabId);
+        }
+
+        function submitUrlOrSearch(query) {
+            if (!query || !query.trim()) return;
+            const val = query.trim();
+            const activeTab = chromeTabs.find(t => t.id === activeTabId);
+
+            if (val.startsWith('http://') || val.startsWith('https://')) {
+                activeTab.url = val;
+                activeTab.title = val.replace(/^https?:\/\//, '').split('/')[0];
+                activeTab.type = 'iframe';
+            } else if (val.includes('.') && !val.includes(' ')) {
+                activeTab.url = 'https://' + val;
+                activeTab.title = val;
+                activeTab.type = 'iframe';
+            } else {
+                activeTab.url = `https://www.google.com/search?q=${encodeURIComponent(val)}`;
+                activeTab.title = val;
+                activeTab.type = 'search';
+                activeTab.query = val;
+            }
+
+            switchTab(activeTabId);
+        }
+
+        function displaySearchResults(query) {
+            const textEl = document.getElementById('search-query-text');
+            const countEl = document.getElementById('results-count');
+            const listEl = document.getElementById('search-results-list');
+
+            if (textEl) textEl.innerText = query;
+            if (countEl) countEl.innerText = 'Sekitar 4.820.000 hasil (0,32 detik)';
+
+            if (listEl) {
+                listEl.innerHTML = `
+                    <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/60 hover:border-cyan-500/40 transition">
+                        <span class="text-[11px] text-slate-400 block mb-1">https://id.wikipedia.org/wiki/${encodeURIComponent(query)}</span>
+                        <a href="#" onclick="submitUrlOrSearch('https://id.wikipedia.org/wiki/${encodeURIComponent(query)}'); return false;" class="text-base font-semibold text-cyan-300 hover:underline mb-1 block">${query} - Wikipedia bahasa Indonesia</a>
+                        <p class="text-xs text-slate-300 leading-relaxed">${query} adalah topik populer di ensiklopedia bebas Wikipedia. Pelajari rincian sejarah, definisi, serta referensi lengkap mengenai topik ini di situs web.</p>
+                    </div>
+
+                    <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/60 hover:border-cyan-500/40 transition">
+                        <span class="text-[11px] text-slate-400 block mb-1">https://duckduckgo.com/?q=${encodeURIComponent(query)}</span>
+                        <a href="#" onclick="submitUrlOrSearch('https://duckduckgo.com/?q=${encodeURIComponent(query)}'); return false;" class="text-base font-semibold text-cyan-300 hover:underline mb-1 block">Hasil Pencarian DuckDuckGo untuk "${query}"</a>
+                        <p class="text-xs text-slate-300 leading-relaxed">Penjelajahan aman dan privat untuk pencarian ${query}. Dapatkan artikel, wawasan, serta gambar terkait secara langsung.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function goHome() {
+            const activeTab = chromeTabs.find(t => t.id === activeTabId);
+            if (activeTab) {
+                activeTab.title = 'Google';
+                activeTab.url = 'https://www.google.com';
+                activeTab.type = 'home';
+                switchTab(activeTabId);
+            }
+        }
+
+        function reloadTab() {
+            switchTab(activeTabId);
+        }
+
+        function navigateHistory(direction) {
+            // Simulated back/forward navigation
+            goHome();
+        }
+
+        // -------------------------------------------------------------
         // GOOGLE DRIVE PERSISTENT STORAGE & GITHUB SYNC (google driver/)
         // -------------------------------------------------------------
         const GITHUB_DRIVE_FOLDER_URL = `https://api.github.com/repos/faudzangaming1146/moszaik-os/contents/google driver`;
