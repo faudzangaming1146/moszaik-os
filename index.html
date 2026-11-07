@@ -34,13 +34,6 @@
                         inset 0 1px 0 rgba(255, 255, 255, 0.4);
         }
 
-        .glass-dark {
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(25px) saturate(180%);
-            -webkit-backdrop-filter: blur(25px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-        }
-
         /* Floating Animation */
         @keyframes floatSlow {
             0%, 100% { transform: translateY(0px); }
@@ -54,7 +47,6 @@
         .animate-float-1 { animation: floatSlow 7s ease-in-out infinite; }
         .animate-float-2 { animation: floatReverse 8s ease-in-out infinite; }
 
-        /* Window animations */
         .window-appear {
             animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
@@ -73,7 +65,6 @@
             100% { opacity: 0; transform: scale(0.94) translateY(15px); }
         }
 
-        /* Custom Scrollbars */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -85,9 +76,6 @@
             background: rgba(156, 163, 175, 0.4);
             border-radius: 4px;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(107, 114, 128, 0.6);
-        }
 
         .tab-active {
             background-color: rgba(30, 41, 59, 1) !important;
@@ -98,13 +86,10 @@
 </head>
 <body class="cyan-bg w-screen h-screen flex flex-col justify-between p-3 sm:p-4 md:p-6 text-slate-800 overflow-hidden">
 
-    <!-- Glowing Background Orbs for dynamic blur effect -->
+    <!-- Glowing Background Orbs -->
     <div class="absolute -top-32 -left-32 w-64 md:w-96 h-64 md:h-96 bg-cyan-300 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-pulse pointer-events-none"></div>
     <div class="absolute top-1/2 -right-32 w-64 md:w-96 h-64 md:h-96 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 pointer-events-none"></div>
     <div class="absolute -bottom-32 left-1/3 w-64 md:w-96 h-64 md:h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-50 pointer-events-none"></div>
-
-    <!-- Hidden Input for Local File Uploading to Google Drive -->
-    <input type="file" id="drive-file-input" class="hidden" multiple onchange="handleFileUpload(this.files)">
 
     <!-- Top Status Bar -->
     <header class="relative z-20 flex justify-between items-center glass-panel px-4 sm:px-6 py-2 sm:py-2.5 rounded-2xl shadow-lg">
@@ -126,53 +111,26 @@
     <!-- Main Workspace Area -->
     <main class="relative z-10 flex-1 my-3 sm:my-6 flex flex-col md:flex-row items-center justify-center gap-4 sm:gap-6 p-2 overflow-y-auto md:overflow-visible">
 
-        <!-- FLOATING UI 1: Information Card "THE MOUSZAIK" -->
+        <!-- FLOATING UI 1: System Hub -->
         <div class="animate-float-1 glass-panel rounded-3xl p-4 sm:p-6 w-full max-w-xs sm:max-w-sm text-white shadow-2xl relative overflow-hidden flex-shrink-0">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-300 via-white to-teal-300"></div>
-            
             <div class="flex items-center justify-between mb-3 sm:mb-4">
                 <span class="px-2.5 py-0.5 sm:px-3 sm:py-1 bg-white/20 rounded-full text-[10px] sm:text-xs font-semibold tracking-wider uppercase text-cyan-100 backdrop-blur-md">
                     System Hub
                 </span>
                 <i class="fa-solid fa-sparkles text-cyan-200 text-base sm:text-lg"></i>
             </div>
-
             <h1 class="text-2xl sm:text-3xl font-black tracking-tight mb-1.5 sm:mb-2 text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-100 to-cyan-200">
                 THE MOUSZAIK
             </h1>
-            
             <p class="text-cyan-50/90 text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4">
-                Ekosistem antarmuka awan modern terintegrasi dengan akses langsung Google Chrome & Drive (GitHub Sync).
+                Ekosistem antarmuka awan terintegrasi dengan GitHub (Drive & Root Music Sync).
             </p>
-
-            <div class="grid grid-cols-2 gap-2.5 sm:gap-3 pt-2.5 sm:pt-3 border-t border-white/15 text-xs text-cyan-100">
-                <div class="bg-white/10 p-2 sm:p-2.5 rounded-xl backdrop-blur-sm">
-                    <span class="block text-white/60 text-[9px] sm:text-[10px] uppercase">Status Sync</span>
-                    <span class="font-semibold text-emerald-300 flex items-center gap-1 mt-0.5 text-[11px] sm:text-xs">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-                        GitHub Aktif
-                    </span>
-                </div>
-                <div class="bg-white/10 p-2 sm:p-2.5 rounded-xl backdrop-blur-sm">
-                    <span class="block text-white/60 text-[9px] sm:text-[10px] uppercase">Pengguna</span>
-                    <span class="font-semibold text-white mt-0.5 block truncate text-[11px] sm:text-xs">faudzansmanten</span>
-                </div>
-            </div>
         </div>
 
         <!-- FLOATING UI 2: Chrome Shortcut -->
-        <div id="chrome-shortcut" 
-             onclick="openChrome()"
-             class="animate-float-2 glass-panel rounded-3xl p-4 sm:p-5 w-full max-w-xs text-white shadow-2xl cursor-pointer hover:bg-white/30 transition-all duration-300 hover:scale-105 active:scale-95 group relative flex-shrink-0">
-            
+        <div onclick="openChrome()" class="animate-float-2 glass-panel rounded-3xl p-4 sm:p-5 w-full max-w-xs text-white shadow-2xl cursor-pointer hover:bg-white/30 transition-all duration-300 hover:scale-105 active:scale-95 group relative flex-shrink-0">
             <div class="flex flex-col items-center text-center">
-                <div class="w-full flex justify-end mb-1">
-                    <span class="bg-emerald-500/80 text-white text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border border-emerald-300/40">
-                        <i class="fa-solid fa-check text-[8px]"></i> Logged In
-                    </span>
-                </div>
-
-                <!-- Chrome Logo Icon -->
                 <div class="relative mb-2 sm:mb-3">
                     <div class="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-full flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform duration-500">
                         <svg class="w-10 h-10 sm:w-13 sm:h-13" viewBox="0 0 24 24">
@@ -183,38 +141,13 @@
                         </svg>
                     </div>
                 </div>
-
-                <h2 class="text-lg sm:text-xl font-bold text-white mb-1 group-hover:text-cyan-200 transition-colors">Google Chrome</h2>
-                
-                <div class="w-full bg-slate-900/40 rounded-xl p-2 sm:p-2.5 mt-1 sm:mt-2 flex items-center space-x-2.5 border border-white/10">
-                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-600 flex items-center justify-center text-[10px] sm:text-xs font-bold text-white shadow-md flex-shrink-0">
-                        F
-                    </div>
-                    <div class="text-left overflow-hidden">
-                        <p class="text-[10px] sm:text-[11px] text-cyan-200 font-semibold truncate leading-none">Faudzan S.</p>
-                        <p class="text-[9px] sm:text-[10px] text-slate-300 truncate mt-0.5">faudzansmanten@gmail.com</p>
-                    </div>
-                </div>
-
-                <p class="text-[10px] sm:text-[11px] text-cyan-100/70 mt-2 sm:mt-3 flex items-center gap-1 font-medium">
-                    <i class="fa-solid fa-arrow-pointer text-[10px]"></i> Klik untuk membuka
-                </p>
+                <h2 class="text-lg sm:text-xl font-bold text-white mb-1">Google Chrome</h2>
             </div>
         </div>
 
         <!-- FLOATING UI 3: Google Drive Shortcut -->
-        <div id="drive-shortcut" 
-             onclick="openDrive()"
-             class="animate-float-1 glass-panel rounded-3xl p-4 sm:p-5 w-full max-w-xs text-white shadow-2xl cursor-pointer hover:bg-white/30 transition-all duration-300 hover:scale-105 active:scale-95 group relative flex-shrink-0">
-            
+        <div onclick="openDrive()" class="animate-float-1 glass-panel rounded-3xl p-4 sm:p-5 w-full max-w-xs text-white shadow-2xl cursor-pointer hover:bg-white/30 transition-all duration-300 hover:scale-105 active:scale-95 group relative flex-shrink-0">
             <div class="flex flex-col items-center text-center">
-                <div class="w-full flex justify-end mb-1">
-                    <span class="bg-emerald-500/80 text-white text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border border-emerald-300/40">
-                        <i class="fa-brands fa-github text-[8px]"></i> GitHub Sync
-                    </span>
-                </div>
-
-                <!-- Drive Logo Icon -->
                 <div class="relative mb-2 sm:mb-3">
                     <div class="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-full flex items-center justify-center shadow-lg group-hover:-rotate-12 transition-transform duration-500">
                         <svg class="w-10 h-10 sm:w-12 sm:h-12" viewBox="0 0 87.3 78">
@@ -224,489 +157,200 @@
                         </svg>
                     </div>
                 </div>
-
-                <h2 class="text-lg sm:text-xl font-bold text-white mb-1 group-hover:text-amber-200 transition-colors">Google Drive</h2>
-                
-                <div class="w-full bg-slate-900/40 rounded-xl p-2 sm:p-2.5 mt-1 sm:mt-2 flex items-center space-x-2.5 border border-white/10">
-                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-tr from-amber-400 to-emerald-600 flex items-center justify-center text-[10px] sm:text-xs font-bold text-white shadow-md flex-shrink-0">
-                        F
-                    </div>
-                    <div class="text-left overflow-hidden">
-                        <p class="text-[10px] sm:text-[11px] text-amber-200 font-semibold truncate leading-none">Folder: google driver</p>
-                        <p class="text-[9px] sm:text-[10px] text-slate-300 truncate mt-0.5">faudzangaming1146</p>
-                    </div>
-                </div>
-
-                <p class="text-[10px] sm:text-[11px] text-cyan-100/70 mt-2 sm:mt-3 flex items-center gap-1 font-medium">
-                    <i class="fa-solid fa-folder-open text-[10px]"></i> Ambil Berkas dari GitHub
-                </p>
+                <h2 class="text-lg sm:text-xl font-bold text-white mb-1">Google Drive</h2>
+                <p class="text-[10px] text-cyan-200">GitHub: google driver/</p>
             </div>
         </div>
 
     </main>
 
-    <!-- WINDOW UI: Google Chrome Browser -->
-    <div id="chrome-window" class="hidden fixed inset-2 sm:inset-4 md:inset-6 z-50 flex flex-col bg-slate-950/95 backdrop-blur-2xl rounded-xl sm:rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
-        
-        <!-- Title Bar & Tab Manager -->
-        <div class="bg-slate-950 px-2 sm:px-3 pt-2 pb-0 flex items-center justify-between border-b border-slate-800 text-xs select-none">
-            <div id="tabs-bar" class="flex items-center space-x-1 overflow-x-auto max-w-[75%] sm:max-w-[85%] pr-2 scrollbar-none"></div>
-            <div class="flex items-center space-x-1.5 pl-1">
-                <button onclick="createNewTab()" class="w-6 h-6 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-xs transition" title="Tab Baru">
-                    <i class="fa-solid fa-plus"></i>
-                </button>
-                <button onclick="closeChrome()" class="w-5 h-5 rounded-full bg-rose-500 hover:bg-rose-600 flex items-center justify-center text-white text-[9px] font-bold shadow transition ml-1" title="Tutup Chrome">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
+    <!-- WINDOW UI: Google Chrome -->
+    <div id="chrome-window" class="hidden fixed inset-2 sm:inset-4 md:inset-6 z-50 flex flex-col bg-slate-950/95 backdrop-blur-2xl rounded-xl shadow-2xl border border-white/20 overflow-hidden">
+        <div class="bg-slate-950 px-3 pt-2 pb-0 flex items-center justify-between border-b border-slate-800 text-xs">
+            <div id="tabs-bar" class="flex items-center space-x-1 overflow-x-auto max-w-[85%] pr-2"></div>
+            <button onclick="closeChrome()" class="w-5 h-5 rounded-full bg-rose-500 text-white text-[9px] font-bold"><i class="fa-solid fa-xmark"></i></button>
         </div>
-
-        <!-- Address Bar -->
-        <div class="bg-slate-900/95 px-2 sm:px-4 py-2 flex items-center space-x-2 sm:space-x-3 border-b border-slate-800">
-            <div class="flex items-center space-x-0.5 sm:space-x-1 text-slate-400 text-xs">
-                <button onclick="navigateHistory(-1)" class="hover:text-white p-1 sm:p-1.5 rounded hover:bg-slate-800"><i class="fa-solid fa-arrow-left"></i></button>
-                <button onclick="reloadTab()" class="hover:text-white p-1 sm:p-1.5 rounded hover:bg-slate-800"><i class="fa-solid fa-rotate-right"></i></button>
-                <button onclick="goHome()" class="hover:text-white p-1 sm:p-1.5 rounded hover:bg-slate-800"><i class="fa-solid fa-house"></i></button>
-            </div>
-
-            <div class="flex-1 bg-slate-950/80 rounded-full px-3 py-1.5 flex items-center space-x-2 text-xs border border-slate-700/80 focus-within:border-cyan-500 transition shadow-inner">
-                <i class="fa-solid fa-lock text-emerald-400 text-[9px] sm:text-[10px]" id="security-icon"></i>
-                <input type="text" id="url-input" value="https://www.google.com" 
-                       onkeydown="if(event.key==='Enter') submitUrlOrSearch(this.value)"
-                       placeholder="Cari di Google atau ketik URL..."
-                       class="bg-transparent border-none outline-none text-slate-200 w-full text-xs font-mono">
-                <button onclick="submitUrlOrSearch(document.getElementById('url-input').value)" class="text-slate-400 hover:text-cyan-400 p-0.5">
-                    <i class="fa-solid fa-arrow-right"></i>
-                </button>
-            </div>
+        <div class="bg-slate-900 px-4 py-2 flex items-center space-x-3 border-b border-slate-800">
+            <input type="text" id="url-input" value="https://www.google.com" onkeydown="if(event.key==='Enter') submitUrlOrSearch(this.value)" class="bg-slate-950 text-slate-200 w-full px-3 py-1.5 rounded-full text-xs outline-none border border-slate-700">
         </div>
-
-        <!-- Chrome Viewport Body -->
         <div id="chrome-body" class="flex-1 bg-slate-900 text-slate-100 relative overflow-hidden flex flex-col">
-            <div id="view-home" class="w-full h-full flex flex-col items-center justify-center p-4 md:p-8 overflow-y-auto">
-                <div class="w-full max-w-2xl flex flex-col items-center text-center my-auto">
-                    <h1 class="text-5xl md:text-7xl font-bold tracking-tight mb-6">
-                        <span class="text-blue-500">G</span><span class="text-red-500">o</span><span class="text-yellow-500">o</span><span class="text-blue-500">g</span><span class="text-green-500">l</span><span class="text-red-500">e</span>
-                    </h1>
-                    <div class="w-full relative mb-6">
-                        <input type="text" id="search-bar" 
-                               placeholder="Cari informasi di web atau ketik URL..." 
-                               onkeydown="if(event.key==='Enter') submitUrlOrSearch(this.value)"
-                               class="w-full bg-slate-800/90 text-white rounded-full py-3.5 pl-12 pr-12 border border-slate-700 focus:bg-slate-800 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 shadow-xl text-sm transition">
-                        <i class="fa-solid fa-magnifying-glass absolute left-4.5 top-4 text-slate-400"></i>
-                    </div>
-                </div>
+            <div id="view-home" class="w-full h-full flex flex-col items-center justify-center p-8">
+                <h1 class="text-6xl font-bold mb-6"><span class="text-blue-500">G</span><span class="text-red-500">o</span><span class="text-yellow-500">o</span><span class="text-blue-500">g</span><span class="text-green-500">l</span><span class="text-red-500">e</span></h1>
             </div>
-
-            <div id="view-results" class="hidden w-full h-full flex flex-col p-6 overflow-y-auto bg-slate-900">
-                <div class="max-w-4xl w-full mx-auto">
-                    <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
-                        <div class="flex items-center space-x-2">
-                            <i class="fa-solid fa-magnifying-glass text-cyan-400"></i>
-                            <h2 class="text-lg font-semibold text-white">Hasil Pencarian: <span id="search-query-text" class="text-cyan-300"></span></h2>
-                        </div>
-                    </div>
-                    <div id="search-results-list" class="space-y-4"></div>
-                </div>
+            <div id="view-results" class="hidden w-full h-full p-6 overflow-y-auto">
+                <h2 class="text-lg font-semibold text-white mb-4">Hasil Pencarian: <span id="search-query-text" class="text-cyan-300"></span></h2>
             </div>
-
             <div id="view-iframe" class="hidden w-full h-full relative">
-                <div id="iframe-loading" class="absolute inset-0 bg-slate-900/90 flex flex-col items-center justify-center z-10">
-                    <i class="fa-solid fa-circle-notch fa-spin text-4xl text-cyan-400 mb-3"></i>
-                    <p class="text-sm text-slate-300 font-medium">Memuat Halaman Web...</p>
-                </div>
-                <iframe id="browser-frame" class="w-full h-full border-none" onload="window.onIframeLoaded && window.onIframeLoaded()" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+                <iframe id="browser-frame" class="w-full h-full border-none" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
             </div>
         </div>
     </div>
 
-    <!-- WINDOW UI: Google Drive Explorer (GitHub Synced) -->
-    <div id="drive-window" class="hidden fixed inset-4 md:inset-10 z-50 flex flex-col bg-slate-900/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-white/20 overflow-hidden"
-         ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
-        
-        <div id="dropzone-overlay" class="hidden absolute inset-0 z-50 bg-cyan-950/80 backdrop-blur-md flex flex-col items-center justify-center border-4 border-dashed border-cyan-400 m-4 rounded-xl">
-            <i class="fa-solid fa-cloud-arrow-up text-6xl text-cyan-400 mb-4 animate-bounce"></i>
-            <h3 class="text-2xl font-bold text-white">Lepaskan file untuk mengunggah</h3>
+    <!-- WINDOW UI: Google Drive Explorer -->
+    <div id="drive-window" class="hidden fixed inset-4 md:inset-10 z-50 flex flex-col bg-slate-900/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
+        <div class="bg-slate-900 px-4 py-3 flex items-center justify-between border-b border-slate-800">
+            <span class="text-white font-semibold text-sm">Google Drive (GitHub Synced: google driver/)</span>
+            <button onclick="closeDrive()" class="w-4 h-4 rounded-full bg-rose-500 text-white text-[8px] font-bold"><i class="fa-solid fa-xmark"></i></button>
         </div>
-
-        <!-- Drive Header -->
-        <div class="bg-slate-900 px-4 py-3 flex items-center justify-between border-b border-slate-800 select-none">
-            <div class="flex items-center space-x-3">
-                <svg class="w-6 h-6" viewBox="0 0 87.3 78">
-                    <path fill="#0066DA" d="M6 78h24.8l20.4-35.3H26.4L6 78z"/>
-                    <path fill="#00AC47" d="M43.7 0L18.9 42.7h24.8L68.5 0H43.7z"/>
-                    <path fill="#FFBA00" d="M87.3 78L62.5 35.3H37.7L62.5 78h24.8z"/>
-                </svg>
-                <span class="text-white font-semibold text-sm">Google Drive (GitHub Synced)</span>
-            </div>
-
-            <div class="flex items-center space-x-4">
-                <div class="flex items-center space-x-2 text-xs bg-slate-800 px-3 py-1 rounded-full border border-slate-700">
-                    <i class="fa-brands fa-github text-cyan-400"></i>
-                    <span class="text-slate-300 font-medium">faudzangaming1146/moszaik-os</span>
-                </div>
-                <button onclick="closeDrive()" class="w-4 h-4 rounded-full bg-rose-500 hover:bg-rose-600 flex items-center justify-center text-white text-[8px] font-bold shadow transition" title="Close Drive">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Drive Content -->
         <div class="flex-1 flex overflow-hidden">
-            <div class="w-64 bg-slate-900/90 border-r border-slate-800 p-4 flex flex-col justify-between hidden md:flex">
-                <div class="space-y-4">
-                    <button onclick="fetchGitHubDriveFiles()" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold py-2.5 px-4 rounded-xl shadow-lg flex items-center justify-center gap-2 transition active:scale-95 text-xs">
-                        <i class="fa-brands fa-github text-sm"></i>
-                        <span>Sync Folder GitHub</span>
-                    </button>
-
-                    <div class="space-y-1 text-xs">
-                        <a href="#" class="flex items-center space-x-3 px-3 py-2 bg-slate-800 text-cyan-400 font-medium rounded-lg">
-                            <i class="fa-solid fa-folder-open"></i>
-                            <span>google driver/</span>
-                        </a>
-                    </div>
-                </div>
-
-                <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700/60 text-xs">
-                    <div class="flex justify-between items-center text-slate-300 mb-1.5">
-                        <span class="flex items-center gap-1.5 font-medium">
-                            <i class="fa-brands fa-github text-cyan-400"></i> Sumber Repo
-                        </span>
-                        <span class="text-[10px] text-cyan-300">Live API</span>
-                    </div>
-                    <p class="text-[10px] text-slate-400 truncate">faudzangaming1146/moszaik-os</p>
-                </div>
+            <div class="w-64 bg-slate-900/90 border-r border-slate-800 p-4 hidden md:flex flex-col">
+                <button onclick="fetchGitHubDriveFiles()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white py-2 rounded-xl text-xs font-semibold mb-3"><i class="fa-brands fa-github"></i> Sync Drive</button>
             </div>
-
-            <div class="flex-1 bg-slate-950/60 p-4 md:p-6 overflow-y-auto flex flex-col">
-                <div class="flex items-center justify-between mb-6 pb-3 border-b border-slate-800">
-                    <h2 class="text-base font-bold text-white flex items-center gap-2">
-                        <span>Folder: google driver/</span>
-                        <span class="text-xs font-normal text-cyan-400">(GitHub Connected)</span>
-                    </h2>
-
-                    <div class="flex items-center space-x-2">
-                        <button onclick="fetchGitHubDriveFiles()" class="bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/30 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition">
-                            <i class="fa-solid fa-rotate-right"></i> Refresh GitHub
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Files Grid -->
-                <div id="file-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                    <!-- Loaded dynamically from GitHub folder 'google driver' -->
-                </div>
+            <div class="flex-1 bg-slate-950/60 p-6 overflow-y-auto">
+                <div id="file-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"></div>
             </div>
         </div>
     </div>
 
-    <!-- WINDOW UI: Music Player -->
-    <div id="music-window" class="hidden fixed inset-2 sm:inset-4 md:inset-x-auto md:inset-y-12 md:right-10 md:w-96 z-50 flex flex-col bg-slate-950/95 backdrop-blur-2xl rounded-2xl sm:rounded-3xl shadow-2xl border border-cyan-500/30 overflow-hidden">
-        <div class="bg-slate-900/90 px-4 sm:px-5 py-3 flex items-center justify-between border-b border-slate-800/80">
+    <!-- WINDOW UI: Music Player (Synced with Root GitHub Repo) -->
+    <div id="music-window" class="hidden fixed inset-2 sm:inset-4 md:inset-x-auto md:inset-y-12 md:right-10 md:w-96 z-50 flex flex-col bg-slate-950/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-cyan-500/30 overflow-hidden">
+        <div class="bg-slate-900/90 px-5 py-3 flex items-center justify-between border-b border-slate-800">
             <div class="flex items-center space-x-2.5">
-                <i class="fa-solid fa-compact-disc text-cyan-400 animate-spin text-base sm:text-lg" style="animation-duration: 4s;"></i>
-                <span class="text-white font-bold text-xs sm:text-sm tracking-wide">Mouszaik Audio</span>
+                <i class="fa-solid fa-compact-disc text-cyan-400 animate-spin text-lg" style="animation-duration: 4s;"></i>
+                <span class="text-white font-bold text-sm">Mouszaik Audio (Root GitHub)</span>
             </div>
-            <button onclick="closeMusic()" class="w-5 h-5 rounded-full bg-rose-500 hover:bg-rose-600 flex items-center justify-center text-white text-[9px] font-bold transition">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
+            <button onclick="closeMusic()" class="w-5 h-5 rounded-full bg-rose-500 text-white text-[9px] font-bold"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
-        <div class="relative bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950 p-5 flex flex-col items-center justify-center border-b border-slate-800/60 overflow-hidden">
-            <canvas id="wave-canvas" class="absolute inset-0 w-full h-full opacity-60 pointer-events-none"></canvas>
-            <div class="relative z-10 w-28 h-28 rounded-2xl overflow-hidden shadow-2xl border-2 border-cyan-400/30 mb-3 group">
+        <div class="bg-slate-950 p-5 flex flex-col items-center justify-center border-b border-slate-800 text-center">
+            <div class="w-24 h-24 rounded-2xl overflow-hidden shadow-lg border border-cyan-400/30 mb-3">
                 <img id="music-cover" src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&auto=format&fit=crop" class="w-full h-full object-cover">
             </div>
-            <div class="relative z-10 text-center w-full px-2">
-                <h3 id="music-title" class="text-base font-bold text-white truncate">Pilih Lagu...</h3>
-                <p id="music-artist" class="text-xs text-cyan-300/80 truncate mt-0.5">Mouszaik Player</p>
+            <h3 id="music-title" class="text-sm font-bold text-white truncate w-full">Memuat Lagu...</h3>
+            <p id="music-artist" class="text-xs text-cyan-300 truncate w-full">faudzangaming1146/moszaik-os</p>
+        </div>
+
+        <div class="p-4 bg-slate-950 flex flex-col space-y-2">
+            <input type="range" id="music-progress" min="0" max="100" value="0" oninput="seekMusic(this.value)" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none accent-cyan-400 cursor-pointer">
+            <div class="flex items-center justify-between px-6 pt-1">
+                <button onclick="prevMusic()" class="text-slate-300 hover:text-white text-base"><i class="fa-solid fa-backward-step"></i></button>
+                <button onclick="togglePlayMusic()" id="btn-play-pause" class="w-10 h-10 rounded-full bg-cyan-600 hover:bg-cyan-500 text-white flex items-center justify-center shadow"><i class="fa-solid fa-play ml-0.5"></i></button>
+                <button onclick="nextMusic()" class="text-slate-300 hover:text-white text-base"><i class="fa-solid fa-forward-step"></i></button>
             </div>
         </div>
 
-        <div class="p-4 bg-slate-950 flex flex-col space-y-3">
-            <div class="w-full">
-                <div class="flex justify-between text-[10px] text-slate-400 font-mono mb-1">
-                    <span id="music-time-curr">0:00</span>
-                    <span id="music-time-dur">0:00</span>
-                </div>
-                <input type="range" id="music-progress" min="0" max="100" value="0" oninput="seekMusic(this.value)"
-                       class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400">
-            </div>
-
-            <div class="flex items-center justify-between px-4">
-                <button onclick="prevMusic()" class="text-slate-300 hover:text-white text-base transition"><i class="fa-solid fa-backward-step"></i></button>
-                <button onclick="togglePlayMusic()" id="btn-play-pause" class="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white flex items-center justify-center shadow-lg transition active:scale-95 text-base">
-                    <i class="fa-solid fa-play ml-0.5"></i>
-                </button>
-                <button onclick="nextMusic()" class="text-slate-300 hover:text-white text-base transition"><i class="fa-solid fa-forward-step"></i></button>
-            </div>
-        </div>
-
-        <div class="flex-1 bg-slate-900/60 p-3 overflow-y-auto border-t border-slate-800/80">
-            <div class="flex items-center justify-between mb-2 px-1">
-                <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider">Playlist (<span id="playlist-count">0</span>)</span>
-                <span id="github-source-tag" class="text-[10px] text-cyan-400 bg-cyan-950 border border-cyan-800/60 px-2 py-0.5 rounded-full truncate max-w-[170px]">faudzangaming1146/moszaik-os</span>
+        <div class="flex-1 bg-slate-900/60 p-3 overflow-y-auto border-t border-slate-800">
+            <div class="flex items-center justify-between mb-2 px-1 text-xs text-slate-300 font-semibold">
+                <span>Playlist GitHub Root (<span id="playlist-count">0</span>)</span>
             </div>
             <div id="playlist-container" class="space-y-1.5"></div>
         </div>
     </div>
 
-    <!-- Modal File Previewer -->
-    <div id="file-preview-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl p-5 shadow-2xl text-slate-100 flex flex-col items-center text-center">
-            <div id="modal-file-icon" class="mb-4"></div>
-            <h3 id="modal-file-name" class="text-lg font-bold text-white mb-1"></h3>
-            <p id="modal-file-size" class="text-xs text-slate-400 mb-4"></p>
-            <div id="modal-preview-container" class="w-full max-h-60 overflow-auto bg-slate-950 p-3 rounded-xl border border-slate-800 mb-5 text-xs text-left font-mono"></div>
-            <button onclick="closeFilePreview()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-cyan-300 font-semibold rounded-xl border border-slate-700 text-xs">Tutup Preview</button>
-        </div>
-    </div>
-
     <!-- Bottom Taskbar -->
     <footer class="relative z-20 flex justify-center items-center">
-        <div class="glass-panel px-4 sm:px-6 py-1.5 sm:py-2 rounded-2xl flex items-center space-x-4 sm:space-x-6">
-            <button onclick="openChrome()" class="p-2 rounded-xl hover:bg-white/20 transition group active:scale-90" title="Google Chrome">
-                <svg class="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24">
-                    <path fill="#EA4335" d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm0-7a10 10 0 0 1 8.66 5h-8.66a5 5 0 0 0-4.33 2.5L4.47 4.2A10 10 0 0 1 12 2z"/>
-                    <path fill="#4285F4" d="M12 17a5 5 0 0 0 4.33-2.5l3.2 5.54A10 10 0 0 1 12 22a10 10 0 0 1-8.66-5h8.66z"/>
-                    <path fill="#FBBC05" d="M4.47 4.2l3.2 5.54A5 5 0 0 0 7 12a5 5 0 0 0 .67 2.5l-3.2 5.54A10 10 0 0 1 2 12a10 10 0 0 1 2.47-7.8z"/>
-                    <circle cx="12" cy="12" r="3.5" fill="#1A73E8"/>
-                </svg>
-            </button>
-            <button onclick="openDrive()" class="p-2 rounded-xl hover:bg-white/20 transition group active:scale-90" title="Google Drive">
-                <svg class="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 87.3 78">
-                    <path fill="#0066DA" d="M6 78h24.8l20.4-35.3H26.4L6 78z"/>
-                    <path fill="#00AC47" d="M43.7 0L18.9 42.7h24.8L68.5 0H43.7z"/>
-                    <path fill="#FFBA00" d="M87.3 78L62.5 35.3H37.7L62.5 78h24.8z"/>
-                </svg>
-            </button>
-            <button onclick="toggleMusic()" class="p-2 rounded-xl hover:bg-white/20 transition group relative active:scale-90" title="Mouszaik Music Player">
-                <i class="fa-solid fa-music text-cyan-200 text-lg sm:text-xl group-hover:scale-110 transition"></i>
-            </button>
+        <div class="glass-panel px-6 py-2 rounded-2xl flex items-center space-x-6">
+            <button onclick="openChrome()" class="p-2 rounded-xl hover:bg-white/20 transition"><i class="fa-solid fa-globe text-cyan-200 text-xl"></i></button>
+            <button onclick="openDrive()" class="p-2 rounded-xl hover:bg-white/20 transition"><i class="fa-solid fa-folder text-amber-300 text-xl"></i></button>
+            <button onclick="toggleMusic()" class="p-2 rounded-xl hover:bg-white/20 transition"><i class="fa-solid fa-music text-cyan-200 text-xl"></i></button>
         </div>
     </footer>
 
     <!-- JavaScript Logic -->
     <script>
-        window.onIframeLoaded = function() {
-            const loadingEl = document.getElementById('iframe-loading');
-            if (loadingEl) loadingEl.classList.add('hidden');
-        };
-
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('current-time').innerText = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-            document.getElementById('current-date').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' });
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-
         const chromeWin = document.getElementById('chrome-window');
         const driveWin = document.getElementById('drive-window');
+        const musicWin = document.getElementById('music-window');
 
-        function openChrome() {
-            chromeWin.classList.remove('hidden', 'window-disappear');
-            chromeWin.classList.add('window-appear');
-        }
-        function closeChrome() {
-            chromeWin.classList.remove('window-appear');
-            chromeWin.classList.add('window-disappear');
-            setTimeout(() => chromeWin.classList.add('hidden'), 200);
-        }
+        function openChrome() { chromeWin.classList.remove('hidden', 'window-disappear'); chromeWin.classList.add('window-appear'); }
+        function closeChrome() { chromeWin.classList.add('window-disappear'); setTimeout(() => chromeWin.classList.add('hidden'), 200); }
 
-        function openDrive() {
-            driveWin.classList.remove('hidden', 'window-disappear');
-            driveWin.classList.add('window-appear');
-            fetchGitHubDriveFiles();
+        function openDrive() { driveWin.classList.remove('hidden', 'window-disappear'); driveWin.classList.add('window-appear'); fetchGitHubDriveFiles(); }
+        function closeDrive() { driveWin.classList.add('window-disappear'); setTimeout(() => driveWin.classList.add('hidden'), 200); }
+
+        function toggleMusic() {
+            if (musicWin.classList.contains('hidden')) {
+                musicWin.classList.remove('hidden', 'window-disappear');
+                musicWin.classList.add('window-appear');
+                if (playlist.length <= 1) fetchGitHubRootMusic();
+            } else {
+                musicWin.classList.add('window-disappear');
+                setTimeout(() => musicWin.classList.add('hidden'), 200);
+            }
         }
-        function closeDrive() {
-            driveWin.classList.remove('window-appear');
-            driveWin.classList.add('window-disappear');
-            setTimeout(() => driveWin.classList.add('hidden'), 200);
-        }
+        function closeMusic() { toggleMusic(); }
 
         // Chrome Tabs Setup
         let chromeTabs = [{ id: 1, title: 'Google', url: 'https://www.google.com', type: 'home' }];
         let activeTabId = 1;
 
         function initChromeTabs() {
-            renderTabs();
-            switchTab(activeTabId);
-        }
-
-        function renderTabs() {
             const tabsBar = document.getElementById('tabs-bar');
-            if (!tabsBar) return;
             tabsBar.innerHTML = '';
-            chromeTabs.forEach(tab => {
-                const isActive = tab.id === activeTabId;
-                const tabEl = document.createElement('div');
-                tabEl.className = `flex items-center space-x-2 px-3 py-1 rounded-t-lg text-xs cursor-pointer transition select-none flex-shrink-0 max-w-[140px] ${isActive ? 'tab-active' : 'bg-slate-900 text-slate-400 hover:bg-slate-800 hover:text-slate-200'}`;
-                tabEl.onclick = () => switchTab(tab.id);
-                tabEl.innerHTML = `
-                    <i class="fa-solid fa-globe text-[10px] ${isActive ? 'text-cyan-400' : 'text-slate-500'}"></i>
-                    <span class="truncate text-[11px] font-medium">${tab.title}</span>
-                `;
-                tabsBar.appendChild(tabEl);
+            chromeTabs.forEach(t => {
+                tabsBar.innerHTML += `<div class="px-3 py-1 rounded-t text-xs bg-slate-900 text-slate-300 cursor-pointer">${t.title}</div>`;
             });
         }
 
-        function switchTab(id) {
-            activeTabId = id;
-            const tab = chromeTabs.find(t => t.id === id);
-            if (!tab) return;
-            renderTabs();
-            document.getElementById('url-input').value = tab.url;
-            
-            document.getElementById('view-home').classList.add('hidden');
-            document.getElementById('view-results').classList.add('hidden');
-            document.getElementById('view-iframe').classList.add('hidden');
-
-            if (tab.type === 'home') document.getElementById('view-home').classList.remove('hidden');
-            else if (tab.type === 'search') {
-                document.getElementById('view-results').classList.remove('hidden');
-                document.getElementById('search-query-text').innerText = tab.query;
-            } else if (tab.type === 'iframe') {
-                document.getElementById('view-iframe').classList.remove('hidden');
-                const frame = document.getElementById('browser-frame');
-                if (frame.src !== tab.url) frame.src = tab.url;
-            }
-        }
-
-        function submitUrlOrSearch(query) {
-            if (!query || !query.trim()) return;
-            const val = query.trim();
-            const activeTab = chromeTabs.find(t => t.id === activeTabId);
-            if (val.startsWith('http://') || val.startsWith('https://')) {
-                activeTab.url = val;
-                activeTab.title = val.replace(/^https?:\/\//, '').split('/')[0];
-                activeTab.type = 'iframe';
-            } else {
-                activeTab.url = `https://www.google.com/search?q=${encodeURIComponent(val)}`;
-                activeTab.title = val;
-                activeTab.type = 'search';
-                activeTab.query = val;
-            }
-            switchTab(activeTabId);
-        }
-
-        function goHome() {
-            const activeTab = chromeTabs.find(t => t.id === activeTabId);
-            if (activeTab) {
-                activeTab.title = 'Google';
-                activeTab.url = 'https://www.google.com';
-                activeTab.type = 'home';
-                switchTab(activeTabId);
-            }
-        }
-        function reloadTab() { switchTab(activeTabId); }
-
-        // -------------------------------------------------------------
-        // GOOGLE DRIVE INTEGRATION FROM GITHUB FOLDER: google driver/
-        // -------------------------------------------------------------
-        const GITHUB_DRIVE_API_URL = "https://api.github.com/repos/faudzangaming1146/moszaik-os/contents/google%20driver";
-        let githubDriveFiles = [];
-
+        // Google Drive from GitHub FOLDER: google driver/
+        const GITHUB_DRIVE_API = "https://api.github.com/repos/faudzangaming1146/moszaik-os/contents/google%20driver";
         async function fetchGitHubDriveFiles() {
             const grid = document.getElementById('file-grid');
-            if (grid) {
-                grid.innerHTML = `<div class="col-span-full text-center py-10 text-cyan-300"><i class="fa-solid fa-circle-notch fa-spin text-3xl mb-2"></i><p class="text-xs">Mengambil file dari folder GitHub google driver/...</p></div>`;
-            }
-
+            grid.innerHTML = `<div class="col-span-full text-center text-cyan-300 text-xs py-6">Memuat file dari GitHub...</div>`;
             try {
-                const response = await fetch(GITHUB_DRIVE_API_URL);
-                if (!response.ok) throw new Error("Gagal terhubung ke GitHub repository folder google driver");
-
-                const files = await response.json();
-                githubDriveFiles = files.map((file, idx) => {
-                    const fileSizeMB = file.size ? parseFloat((file.size / (1024 * 1024)).toFixed(2)) || 0.1 : 0.5;
-                    const formattedSize = file.size > 1024 * 1024 ? `${fileSizeMB} MB` : `${((file.size || 500) / 1024).toFixed(1)} KB`;
-
-                    let fileType = 'document';
-                    if (file.name.match(/\.(png|jpg|jpeg|gif|svg)$/i)) fileType = 'image';
-                    else if (file.name.match(/\.(pdf)$/i)) fileType = 'pdf';
-                    else if (file.name.match(/\.(docx|doc)$/i)) fileType = 'document';
-
-                    return {
-                        id: 'gh_drive_' + idx,
-                        name: file.name,
-                        type: fileType,
-                        size: formattedSize,
-                        sizeMB: fileSizeMB,
-                        downloadUrl: file.download_url,
-                        content: `File GitHub dari folder 'google driver/': ${file.name}\nURL Unduhan Langsung: ${file.download_url}`
-                    };
+                const res = await fetch(GITHUB_DRIVE_API);
+                const files = await res.json();
+                grid.innerHTML = '';
+                files.forEach(file => {
+                    let icon = 'fa-file text-cyan-400';
+                    if (file.name.endsWith('.pdf')) icon = 'fa-file-pdf text-rose-400';
+                    else if (file.name.endsWith('.docx')) icon = 'fa-file-word text-blue-400';
+                    
+                    grid.innerHTML += `
+                        <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl flex flex-col items-center text-center cursor-pointer hover:border-cyan-500">
+                            <i class="fa-solid ${icon} text-3xl my-2"></i>
+                            <span class="text-xs text-slate-200 truncate w-full">${file.name}</span>
+                            <a href="${file.download_url}" target="_blank" class="text-[10px] text-cyan-400 mt-1 underline">Unduh</a>
+                        </div>
+                    `;
                 });
-
-                renderGitHubDriveFiles();
-            } catch (err) {
-                console.warn("Error fetching GitHub drive files:", err);
-                if (grid) {
-                    grid.innerHTML = `<div class="col-span-full text-center py-10 text-rose-400 text-xs">Gagal memuat folder dari GitHub. Pastikan repo publik dan folder 'google driver' tersedia.</div>`;
-                }
+            } catch(e) {
+                grid.innerHTML = `<div class="col-span-full text-center text-rose-400 text-xs">Gagal memuat folder Google Driver dari GitHub.</div>`;
             }
         }
 
-        function renderGitHubDriveFiles() {
-            const grid = document.getElementById('file-grid');
-            if (!grid) return;
-            grid.innerHTML = '';
-
-            if (githubDriveFiles.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400 text-xs">Folder google driver kosong.</div>`;
-                return;
-            }
-
-            githubDriveFiles.forEach(file => {
-                let iconClass = 'fa-file text-cyan-400';
-                if (file.name.endsWith('.pdf')) iconClass = 'fa-file-pdf text-rose-400';
-                else if (file.name.endsWith('.docx') || file.name.endsWith('.doc')) iconClass = 'fa-file-word text-blue-400';
-                else if (file.type === 'image') iconClass = 'fa-file-image text-emerald-400';
-
-                const card = document.createElement('div');
-                card.className = 'bg-slate-900 border border-slate-800 hover:border-cyan-500/50 p-3 rounded-xl flex flex-col items-center text-center cursor-pointer hover:scale-102 transition group relative';
-                card.onclick = () => previewDriveFile(file);
-
-                card.innerHTML = `
-                    <span class="absolute top-2 left-2 text-[9px] bg-cyan-950/80 text-cyan-300 border border-cyan-800 px-1.5 py-0.5 rounded-md font-mono"><i class="fa-brands fa-github text-[9px]"></i> GitHub</span>
-                    <i class="fa-solid ${iconClass} text-4xl my-3 group-hover:scale-110 transition"></i>
-                    <span class="text-xs font-medium text-slate-200 truncate w-full px-1" title="${file.name}">${file.name}</span>
-                    <span class="text-[10px] text-slate-400 mt-1">${file.size}</span>
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-        function previewDriveFile(file) {
-            document.getElementById('modal-file-name').innerText = file.name;
-            document.getElementById('modal-file-size').innerText = `Ukuran: ${file.size} | Sumber: GitHub (google driver/)`;
-            document.getElementById('modal-preview-container').innerText = file.content;
-            document.getElementById('file-preview-modal').classList.remove('hidden');
-        }
-
-        function closeFilePreview() {
-            document.getElementById('file-preview-modal').classList.add('hidden');
-        }
-
-        // Music Player Setup
-        const musicWin = document.getElementById('music-window');
-        let audioObj = new Audio();
-        let isPlaying = false;
-        let playlist = [{ title: "Cyberpunk Ambient Wave", artist: "Mouszaik Sound Labs", url: "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3" }];
+        // MUSIC PLAYER: Synced with Root GitHub Repository (`faudzangaming1146/moszaik-os`)
+        const GITHUB_ROOT_API = "https://api.github.com/repos/faudzangaming1146/moszaik-os/contents/";
+        let playlist = [
+            { title: "Cyberpunk Ambient Wave", artist: "Mouszaik Sound Labs", url: "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3" }
+        ];
         let currentTrackIdx = 0;
+        let audioObj = new Audio(playlist[0].url);
+        let isPlaying = false;
 
-        function toggleMusic() {
-            if (musicWin.classList.contains('hidden')) {
-                musicWin.classList.remove('hidden');
-                musicWin.classList.add('window-appear');
-            } else {
-                musicWin.classList.remove('window-appear');
-                musicWin.classList.add('window-disappear');
-                setTimeout(() => musicWin.classList.add('hidden'), 200);
+        async function fetchGitHubRootMusic() {
+            try {
+                const res = await fetch(GITHUB_ROOT_API);
+                const files = await res.json();
+                
+                // Filter file audio (.mp3, .wav, .ogg, .m4a) yang berada di root repo sejajar dengan index.html
+                const audioFiles = files.filter(f => f.type === "file" && f.name.match(/\.(mp3|wav|ogg|m4a)$/i));
+
+                if (audioFiles.length > 0) {
+                    playlist = audioFiles.map(f => ({
+                        title: f.name.replace(/\.[^/.]+$/, ""),
+                        artist: "faudzangaming1146/moszaik-os",
+                        url: f.download_url,
+                        cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&auto=format&fit=crop"
+                    }));
+                    loadTrack(0, false);
+                }
+                renderPlaylist();
+            } catch(e) {
+                console.warn("Gagal memuat lagu dari root GitHub:", e);
+                renderPlaylist();
             }
         }
-        function closeMusic() { toggleMusic(); }
+
+        function loadTrack(idx, play = true) {
+            currentTrackIdx = idx;
+            const track = playlist[idx];
+            audioObj.src = track.url;
+            document.getElementById('music-title').innerText = track.title;
+            document.getElementById('music-artist').innerText = track.artist;
+            renderPlaylist();
+            if (play) playMusic();
+        }
 
         function togglePlayMusic() {
             if (isPlaying) { audioObj.pause(); isPlaying = false; }
@@ -714,9 +358,41 @@
             document.getElementById('btn-play-pause').innerHTML = isPlaying ? `<i class="fa-solid fa-pause"></i>` : `<i class="fa-solid fa-play ml-0.5"></i>`;
         }
 
+        function playMusic() {
+            audioObj.play().catch(() => {});
+            isPlaying = true;
+            document.getElementById('btn-play-pause').innerHTML = `<i class="fa-solid fa-pause"></i>`;
+        }
+
+        function nextMusic() { loadTrack((currentTrackIdx + 1) % playlist.length, true); }
+        function prevMusic() { loadTrack((currentTrackIdx - 1 + playlist.length) % playlist.length, true); }
+        function seekMusic(val) { if (audioObj.duration) audioObj.currentTime = (val / 100) * audioObj.duration; }
+
+        audioObj.ontimeupdate = () => {
+            if (audioObj.duration) {
+                document.getElementById('music-progress').value = (audioObj.currentTime / audioObj.duration) * 100;
+            }
+        };
+        audioObj.onended = () => nextMusic();
+
+        function renderPlaylist() {
+            const container = document.getElementById('playlist-container');
+            document.getElementById('playlist-count').innerText = playlist.length;
+            container.innerHTML = '';
+            playlist.forEach((track, i) => {
+                const isCur = i === currentTrackIdx;
+                container.innerHTML += `
+                    <div onclick="loadTrack(${i}, true)" class="p-2 rounded-xl cursor-pointer text-xs flex items-center justify-between transition ${isCur ? 'bg-cyan-950 text-cyan-300 border border-cyan-800' : 'bg-slate-900/60 text-slate-300 hover:bg-slate-800'}">
+                        <span class="truncate pr-2">${track.title}</span>
+                        ${isCur ? '<i class="fa-solid fa-volume-high"></i>' : ''}
+                    </div>
+                `;
+            });
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             initChromeTabs();
-            fetchGitHubDriveFiles();
+            fetchGitHubRootMusic();
         });
     </script>
 </body>
