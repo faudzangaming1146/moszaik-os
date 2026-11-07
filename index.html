@@ -202,7 +202,7 @@
         </div>
     </div>
 
-    <!-- WINDOW UI: Music Player (Synced with Root GitHub Repo) -->
+    <!-- WINDOW UI: Music Player -->
     <div id="music-window" class="hidden fixed inset-2 sm:inset-4 md:inset-x-auto md:inset-y-12 md:right-10 md:w-96 z-50 flex flex-col bg-slate-950/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-cyan-500/30 overflow-hidden">
         <div class="bg-slate-900/90 px-5 py-3 flex items-center justify-between border-b border-slate-800">
             <div class="flex items-center space-x-2.5">
@@ -212,12 +212,12 @@
             <button onclick="closeMusic()" class="w-5 h-5 rounded-full bg-rose-500 text-white text-[9px] font-bold"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
-        <div class="bg-slate-950 p-5 flex flex-col items-center justify-center border-b border-slate-800 text-center">
-            <div class="w-24 h-24 rounded-2xl overflow-hidden shadow-lg border border-cyan-400/30 mb-3">
+        <div class="bg-slate-950 p-5 flex flex-col items-center justify-center border-b border-slate-800 text-center relative overflow-hidden">
+            <div class="w-24 h-24 rounded-2xl overflow-hidden shadow-lg border border-cyan-400/30 mb-3 relative z-10">
                 <img id="music-cover" src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&auto=format&fit=crop" class="w-full h-full object-cover">
             </div>
-            <h3 id="music-title" class="text-sm font-bold text-white truncate w-full">Memuat Lagu...</h3>
-            <p id="music-artist" class="text-xs text-cyan-300 truncate w-full">faudzangaming1146/moszaik-os</p>
+            <h3 id="music-title" class="text-sm font-bold text-white truncate w-full relative z-10">Memuat Lagu...</h3>
+            <p id="music-artist" class="text-xs text-cyan-300 truncate w-full relative z-10">faudzangaming1146/moszaik-os</p>
         </div>
 
         <div class="p-4 bg-slate-950 flex flex-col space-y-2">
@@ -237,12 +237,19 @@
         </div>
     </div>
 
-    <!-- Bottom Taskbar -->
-    <footer class="relative z-20 flex justify-center items-center">
+    <!-- Bottom Taskbar Area & Dynamic Wave Visualizer -->
+    <footer class="relative z-20 flex flex-col items-center justify-center">
+        
+        <!-- VISUALIZER BERGELOMBANG (Sine Wave Canvas) DI ATAS BAR LOGO -->
+        <div id="dock-wave-container" class="hidden w-64 h-12 mb-1 pointer-events-none relative flex justify-center items-end">
+            <canvas id="dock-wave-canvas" class="w-full h-full opacity-90"></canvas>
+        </div>
+
+        <!-- Taskbar Panel -->
         <div class="glass-panel px-6 py-2 rounded-2xl flex items-center space-x-6">
-            <button onclick="openChrome()" class="p-2 rounded-xl hover:bg-white/20 transition"><i class="fa-solid fa-globe text-cyan-200 text-xl"></i></button>
-            <button onclick="openDrive()" class="p-2 rounded-xl hover:bg-white/20 transition"><i class="fa-solid fa-folder text-amber-300 text-xl"></i></button>
-            <button onclick="toggleMusic()" class="p-2 rounded-xl hover:bg-white/20 transition"><i class="fa-solid fa-music text-cyan-200 text-xl"></i></button>
+            <button onclick="openChrome()" class="p-2 rounded-xl hover:bg-white/20 transition" title="Chrome"><i class="fa-solid fa-globe text-cyan-200 text-xl"></i></button>
+            <button onclick="openDrive()" class="p-2 rounded-xl hover:bg-white/20 transition" title="Drive"><i class="fa-solid fa-folder text-amber-300 text-xl"></i></button>
+            <button onclick="toggleMusic()" class="p-2 rounded-xl hover:bg-white/20 transition" title="Music Player"><i class="fa-solid fa-music text-cyan-200 text-xl"></i></button>
         </div>
     </footer>
 
@@ -309,21 +316,26 @@
             }
         }
 
-        // MUSIC PLAYER: Synced with Root GitHub Repository (`faudzangaming1146/moszaik-os`)
+        // MUSIC PLAYER & WAVE VISUALIZER
         const GITHUB_ROOT_API = "https://api.github.com/repos/faudzangaming1146/moszaik-os/contents/";
         let playlist = [
             { title: "Cyberpunk Ambient Wave", artist: "Mouszaik Sound Labs", url: "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3" }
         ];
         let currentTrackIdx = 0;
         let audioObj = new Audio(playlist[0].url);
+        audioObj.crossOrigin = "anonymous";
         let isPlaying = false;
+        
+        let audioCtx = null;
+        let analyser = null;
+        let audioSource = null;
+        let waveAnimFrame = null;
+        let wavePhase = 0;
 
         async function fetchGitHubRootMusic() {
             try {
                 const res = await fetch(GITHUB_ROOT_API);
                 const files = await res.json();
-                
-                // Filter file audio (.mp3, .wav, .ogg, .m4a) yang berada di root repo sejajar dengan index.html
                 const audioFiles = files.filter(f => f.type === "file" && f.name.match(/\.(mp3|wav|ogg|m4a)$/i));
 
                 if (audioFiles.length > 0) {
@@ -337,7 +349,6 @@
                 }
                 renderPlaylist();
             } catch(e) {
-                console.warn("Gagal memuat lagu dari root GitHub:", e);
                 renderPlaylist();
             }
         }
@@ -352,16 +363,43 @@
             if (play) playMusic();
         }
 
+        function initAudioContext() {
+            if (audioCtx) return;
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioCtx.createAnalyser();
+                analyser.fftSize = 64;
+                audioSource = audioCtx.createMediaElementSource(audioObj);
+                audioSource.connect(analyser);
+                analyser.connect(audioCtx.destination);
+            } catch (e) {
+                console.warn('AudioContext initialized');
+            }
+        }
+
         function togglePlayMusic() {
-            if (isPlaying) { audioObj.pause(); isPlaying = false; }
-            else { audioObj.play(); isPlaying = true; }
-            document.getElementById('btn-play-pause').innerHTML = isPlaying ? `<i class="fa-solid fa-pause"></i>` : `<i class="fa-solid fa-play ml-0.5"></i>`;
+            if (isPlaying) { 
+                pauseMusic();
+            } else { 
+                playMusic();
+            }
         }
 
         function playMusic() {
-            audioObj.play().catch(() => {});
-            isPlaying = true;
-            document.getElementById('btn-play-pause').innerHTML = `<i class="fa-solid fa-pause"></i>`;
+            initAudioContext();
+            audioObj.play().then(() => {
+                isPlaying = true;
+                document.getElementById('btn-play-pause').innerHTML = `<i class="fa-solid fa-pause"></i>`;
+                document.getElementById('dock-wave-container').classList.remove('hidden');
+                startWaveAnimation();
+            }).catch(() => {});
+        }
+
+        function pauseMusic() {
+            audioObj.pause();
+            isPlaying = false;
+            document.getElementById('btn-play-pause').innerHTML = `<i class="fa-solid fa-play ml-0.5"></i>`;
+            document.getElementById('dock-wave-container').classList.add('hidden');
         }
 
         function nextMusic() { loadTrack((currentTrackIdx + 1) % playlist.length, true); }
@@ -384,10 +422,67 @@
                 container.innerHTML += `
                     <div onclick="loadTrack(${i}, true)" class="p-2 rounded-xl cursor-pointer text-xs flex items-center justify-between transition ${isCur ? 'bg-cyan-950 text-cyan-300 border border-cyan-800' : 'bg-slate-900/60 text-slate-300 hover:bg-slate-800'}">
                         <span class="truncate pr-2">${track.title}</span>
-                        ${isCur ? '<i class="fa-solid fa-volume-high"></i>' : ''}
+                        ${isCur && isPlaying ? '<i class="fa-solid fa-volume-high text-cyan-400 animate-pulse"></i>' : ''}
                     </div>
                 `;
             });
+        }
+
+        // ANIMASI SINE WAVE FLUID VISUALIZER
+        function startWaveAnimation() {
+            const canvas = document.getElementById('dock-wave-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            function renderWave() {
+                if (!isPlaying) return;
+                waveAnimFrame = requestAnimationFrame(renderWave);
+
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+
+                const width = canvas.width;
+                const height = canvas.height;
+                ctx.clearRect(0, 0, width, height);
+
+                let audioAmp = 10;
+                if (analyser) {
+                    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+                    analyser.getByteFrequencyData(dataArray);
+                    let avg = 0;
+                    for (let i = 0; i < dataArray.length; i++) avg += dataArray[i];
+                    audioAmp = (avg / dataArray.length) * 0.25 + 6;
+                }
+
+                wavePhase += 0.06;
+
+                // 3 Lapisan Gelombang Transparan Berwarna Cyan/Blue
+                const waves = [
+                    { color: 'rgba(6, 182, 212, 0.7)', speed: 1.0, freq: 0.03, amp: audioAmp },
+                    { color: 'rgba(56, 189, 248, 0.5)', speed: 1.4, freq: 0.04, amp: audioAmp * 0.7 },
+                    { color: 'rgba(168, 85, 247, 0.4)', speed: 0.8, freq: 0.02, amp: audioAmp * 1.2 }
+                ];
+
+                waves.forEach((w) => {
+                    ctx.beginPath();
+                    ctx.fillStyle = w.color;
+
+                    const yOffset = height * 0.6;
+                    ctx.moveTo(0, height);
+                    ctx.lineTo(0, yOffset);
+
+                    for (let x = 0; x <= width; x += 5) {
+                        const y = Math.sin(x * w.freq + wavePhase * w.speed) * w.amp + yOffset;
+                        ctx.lineTo(x, y);
+                    }
+
+                    ctx.lineTo(width, height);
+                    ctx.closePath();
+                    ctx.fill();
+                });
+            }
+
+            renderWave();
         }
 
         window.addEventListener('DOMContentLoaded', () => {
